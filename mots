@@ -1178,7 +1178,7 @@ analyse_par_mots_detail()
    echo -e "$donnees_source$ligne_commande | Type : $type | Charset : $char_set | Octets : $octets" | tee -a $fichier_sortie
    if [ $type == texte ]; then
       echo "::: Lignes : $total_lignes | Dont vides : $vides | Espaces sécables : $espaces | Autres car. impr. $supp_ajout: $autres"  | tee -a $fichier_sortie
-      echo "::: Nombre de mots : $nb_mots | Nombre de caractères de toute nature : "$(($total_lignes + $car_in_mots + $espaces + $autres))
+      echo "::: Nombre de mots : $nb_mots | Nombre de caractères de toute nature : "$(($total_lignes + $car_in_mots + $espaces + $autres)) | tee -a $fichier_sortie
       echo "::: Nombre de caractères composant les mots : $car_in_mots | Dont insécables : $nb_total_insecables | Dont ponct. : $nb_punct_dans_mots" | tee -a $fichier_sortie
       if [ $option_monetaire == 1 ]; then
          echo "::: Espaces monetaires remplacés : $esp_monetaires | Points et virgules monetaires inclus en mots : $pt_virg_monetaires" | tee -a $fichier_sortie
