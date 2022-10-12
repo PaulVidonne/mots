@@ -1,11 +1,8 @@
 #!/bin/bash
 
-version="6.40 b-20211223"
+version="6.40 b-20211018"
 
 LC_ALL=C
-if ! [ $LANG == fr_FR.UTF-8 ] ; then
-    LANG=fr_FR.UTF-8
-fi
 set -f
 
 if [ ! -t 0 ]; then
@@ -25,7 +22,6 @@ if [ $type_entree == directe ];then
       echo -e "\n::: $(basename $0) version : $version\n"
       exit
    fi
-
 #-------------------------------------dont le help-------------------------------------------
 echo "$@" | grep -q -E "\-\-help"
 if [ $? == 0 ] ; then
@@ -34,16 +30,16 @@ cat << EOF
 
    Usage     $(basename $0) [--help | --version] [OPTIONS]... FICHIER | redirection
 
-   Objet     le logiciel $(basename $0) version $version décompte les mots, les syllabes, les
-             phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des
-             mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères
-             et des mots, avec de nombreuses possibilités : il permet par exemple la recherche
-             de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il
-             calcule tous les indices classiques de lisibilité auxquels il ajoute un indice
-             spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend
-             de nombreuses options et sous-options. Il restitue les données de manière
-             détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il
-             peut établir un fichier de sortie au format CSV pour retraitements externes.
+   Objet     le logiciel $(basename $0) version $version décompte les mots, les syllabes, les phrases
+             et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des
+             phrases et fait leurs moyennes. Il calcule la fréquence des caractères et des mots, avec
+             de nombreuses possibilités : il permet par exemple de rechercher la fréquence des mots
+             d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques
+             de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de
+             richesse de vocabulaire. Il comprend de nombreuses options et sous-options. Il restitue
+             les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type
+             texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements
+             externes.
 EOF
 echo -e "\n\e[1;97mOPTIONS ET SOUS-OPTIONS\e[0m"
 cat << EOF
@@ -52,59 +48,60 @@ cat << EOF
    --version version
 
    ANALYSE DES MOTS
-             sans arguments, '$(basename $0)' affiche la synthèse de l'analyse du texte soumis, avec
-             les longueurs moyennes des mots et des phrases (pour les textes), le nombre de
-             phrases, de mots, de lignes, de caractères et calcule les trois indices de
-             lisibilité de Coleman-Liau, ARI et un indice spécifique, sans lister les mots du
-             texte.
+             sans arguments, '$(basename $0)' affiche la synthèse de l'analyse du texte soumis, avec les
+             longueurs moyennes des mots et des phrases (pour les textes), le nombre de phrases,
+             de mots, de lignes, de caractères et calcule les trois indices de lisibilité de
+             Coleman-Liau, ARI et un indice spécifique, sans lister les mots du texte.
 
-      -l     fait de même et liste les mots avec leur longueur individuelle et leur rang dans
-             l'ordre du texte et donne la répartition des mots selon leur taille en nombre de
-             lettres et signes.
+      -l     fait de même et liste des mots avec leur longueur individuelle et leur rang dans l'ordre
+             du texte et donne la répartition des mots selon leur taille en nombre de lettres et
+             signes.
 
-      -s     liste les mots décomposés en syllabes, les décompte, indique la répartition des
-             mots par nombre de syllabes et ajoute les quatre indices de lisibilité de Flesh-
-             Kincaid général, Flesh-Kincaid éducation, Gunning-Fog et SMOG. L'usage de
-             l'option -s0 est suggéré.
+      -s     liste les mots décomposés en syllabes, les décompte, indique la répartition des mots
+             par nombre de syllabes et ajoute les quatre indices de lisibilité de Flesh-Kincaid
+             général, Flesh-Kincaid éducation, Gunning-Fog et SMOG. L'usage de l'option -s0 est
+             suggéré.
 
    FREQUENCE DES CARACTERES
-             les deux options ci-après établissent la fréquence des caractères du texte
-             analysé avec le pourcentage que représente chacun (hors espaces).
+             les deux options ci-après établissent la fréquence des caractères du texte analysé
+             avec le pourcentage que représente chacun (hors espaces).
 
-      -ca    liste les caractères du texte avec leur fréquence dans l'ordre alphabétique.
+      -ca    liste les caractères du texte avec leur fréquence dans l'ordre alphabétique. Cet
+             ordre peut varier avec les langues et les réglages des paramétres régionaux.
 
-      -cf    liste les caractères du texte avec leur rang et leur fréquence dans l'ordre de
-             leur fréquence et dans l'ordre alphabétique en second rang.
+      -cf    liste les caractères du texte avec leur rang et leur fréquence dans l'ordre de leur
+             fréquence.
 
    FREQUENCE DES MOTS
              toutes les options ci-après calculent la fréquence des mots et les quatre indices
-             de dispersion du vocabulaire de Gini, Gini hors happax, Shannon et Simpson.
-             L'usage de l'option -sc est suggéré.
+             de dispersion du vocabulaire de Gini, Gini hors happax, Shannon et Simpson. L'usage
+             de l'option -sc est suggéré.
 
-      -fa    liste les mots du texte avec leur fréquence dans l'ordre alphabétique.
+      -fa    liste les mots du texte avec leur fréquence dans l'ordre alphabétique. Cet ordre
+             peut varier avec les langues et les réglages des paramétres régionaux.
 
       -ff    liste les mots du texte avec leur rang et leur fréquence dans l'ordre de leur
-             fréquence et dans l'ordre alphabétique en second rang.
+             fréquence.
 
-      -xa    liste les mots du texte, déterminé par les sous-options -x=XXX et -y=YY, avec
-             leur fréquence dans l'ordre alphabétique.
+      -xa    liste les mots du texte, déterminé par les sous-options -x=XXX et -y=YY, avec leur
+             fréquence dans l'ordre alphabétique.
 
-      -xf    liste les mots du texte, déterminé par les sous-options -x=XXX et -y=YY, avec
-             leur rang et leur fréquence dans l'ordre de leur fréquence.
+      -xf    liste les mots du texte, déterminé par les sous-options -x=XXX et -y=YY, avec leur
+             rang et leur fréquence dans l'ordre de leur fréquence.
 
       -x=XXX liste les XXX premières fréquences des mots du texte analysé. Maximum 999999. Par
              défaut XXX=20. Toujours associé à une valeur de YY.
 
-      -y=YY  liste les fréquences des mots du texte analysé de plus de YY caractères. Par
-             défaut YY=3. Minimum 1. Maximum 64. Toujours associé à une valeur de XXX.
+      -y=YY  liste les fréquences des mots du texte analysé de plus de YY caractères. Par défaut
+             YY=3. Minimum 1. Maximum 14. Toujours associé à une valeur de XXX.
 
       -i=FICHIER
              FICHIER est un fichier de vocabulaire qui contient les mots dont on recherche la
-             fréquence dans le texte analysé. Le séparateur des mots dans FICHIER est l'espace
+             fréquence dans le texte analysé. Le séparateur des mots dans FICHIER est l'espace.
              Ces mots peuvent comprendre apostrophe, tiret, tiret inférieur, barre oblique,
-             espace insécable ainsi que point et virgule pour les nombres. Tout autre signe
-             est ignoré (notamment les glyphes monétaires). Pas de joker possible. Option -ia
-             ou -if obligatoire.
+             espace insécable ainsi que point et virgule pour les nombres. Tout autre signe est
+             ignoré (notamment les glyphes monétaires). Pas de joker possible. Option -ia ou -if
+             obligatoire.
 
       -ia    liste les mots du texte présents dans le fichier de vocabulaire défini par
              -i=FICHIER avec leur fréquence dans l'ordre alphabétique.
@@ -119,46 +116,40 @@ cat << EOF
 
       -is0   supprime les chiffres (0 à 9) dans le fichier de vocabulaire.
 
-      -ic=CHARSET
-             charset du fichier de vocabulaire forcé à CHARSET et non à la valeur décelée par
-             le programme.
-
    REGROUPEMENT D'OPTIONS
 
-      -z    regroupe les options -s -fa -sl de sorte que toutes les données et tous les
-            indices sont affichés de manière synthétique par une seule commande.
+      -z    regroupe les options -s -fa -sl de sorte que toutes les données et tous les indices
+            sont affichés de manière synthétique par une seule commande.
 
    SOUS-OPTIONS GENERALES
              les sous-options générales s'appliquent aux analyses des mots et à celles des
              fréquences pour les textes seulement (seules les options -sc et -sd peuvent
              s'appliquer aux listes).
 
-      -m     remplace les espaces des expressions monétaires numériques exprimées par groupes
-             de trois chiffres par des espaces insécables, de sorte que ces expressions
-             deviennent des mots.
+      -m     remplace les espaces des expressions monétaires numériques exprimées par groupes de
+             trois chiffres par des espaces insécables, de sorte que ces expressions deviennent
+             des mots.
 
       -sc    remplace les capitales par des bas de casse dans les données analysées.
 
       -sd    remplace les caractères avec signes diacritiques par les mêmes sans signes
              diacritiques.
 
-      -sp    supprime toute la "ponctuation", selon la liste qui figure à l'article du même
-             nom ci-dessous, y compris au sein des mots du texte analysé. Ainsi 'nid-de-poule'
-             (un mot) se découpe alors en trois mots 'nid' 'de' 'poule'.
+      -sp    supprime toute la "ponctuation", selon la liste qui figure à l'article du même nom
+             ci-dessous, y compris au sein des mots du texte analysé. Ainsi 'oeil-de-boeuf' (un
+             mot) se découpe alors en trois mots 'oeil de boeuf'.
 
-      -s0    supprime les chiffres (de 0 à 9) des données analysées. Entraine la suppression
-             des signes situés entre les chiffres et des glyphes pouvant les suivre.
+      -s0    supprime les chiffres (de 0 à 9) des données analysées. Entraine la suppression des
+             signes situés entre les chiffres et des glyphes pouvant les suivre.
 
-      -sl    annule l'impression détaillée des listes et n'affiche que la synthèse des
-             analyses.
+      -sl    annule l'impression détaillée des listes et n'affiche que la synthèse des analyses.
 
       -c=CHARSET
              charset du fichier à analyser forcé à CHARSET et non à la valeur décelée par le
              programme.
 
       -o=FICHIER
-             envoie le résultat écran également dans le fichier FICHIER. Le crée s'il n'existe
-             pas.
+             envoie le résultat écran également dans le fichier FICHIER. Le crée s'il n'existe pas.
 
       -pdf   réalise une copie du fichier FICHIER au format PDF ; ce fichier prend le nom de
              FICHIER avec l'extension .pdf
@@ -181,18 +172,17 @@ cat << EOF
    DEFINITIONS GENERALES
 
       FICHIER
-             désigne le fichier à analyser en argument de la ligne de commande. Peut compendre
              tout fichier informatique (a priori composé de texte), pour tout charset. Le
              logiciel vérifiera le type et écartera les fichiers non exploitables : binaires,
-             fichiers au format traitement de texte en particulier. Si plusieurs noms de
-             fichiers sont indiqués, seul le dernier sera pris en compte. Ce fichier sera
-             débarassé des éventuels détritus qu'il peut comporter.
+             fichiers au format traitement de texte en particulier. Si plusieurs noms de fichiers
+             sont indiqués, seul le dernier sera pris en compte. Ce fichier sera débarassé des
+             éventuels détritus qu'il peut comporter.
 
       liste  est considérée comme liste toute suite de caractères et de signes divers figurant
              sur une ligne distincte. Chaque ligne est considérée comme formant un seul mot,
              l'auteur étant seul responsable de ce qu'il considère comme tel. Aucun traitement
-             automatique n'est effectué sur les listes. Seules les options -sc -sd peuvent
-             leur être appliquées.
+             automatique n'est effectué sur les listes. Seules les options -sc -sd peuvent leur
+             être appliquées.
 
       texte  texte quelconque pouvant comprendre tous les signes figurant ou pouvant être
              composés sur les différents claviers latins nationaux.
@@ -202,61 +192,59 @@ cat << EOF
 
       mot    EN LISTE. Toute suite de caractères figurant sur une même ligne, par exemple "eau
              de vie" sans tirets est considéré comme un seul mot. Tout autre signe figurant
-             sur la ligne est compté dans la longueur du mot, y compris les éventuelles
-             espaces finales.
+             sur la ligne est compté dans la longueur du mot, y compris les éventuelles espaces
+             finales.
 
              EN TEXTE. Toute suite continue de caractères alphabétiques ou numériques séparée
              par une espace sécable. Ainsi "eau de vie" sans tirets sera considéré comme trois
              mots, sauf si les espaces sont des insécables. Les mots comportant apostrophe,
-             tiret, tiret inférieur, barre oblique, espace insécable, point forment un seul
-             mot comme "arc-en-ciel", "aujourd’hui", "O'Connor", "10/18" ou "www.societe.com".
-             Ces règles sont ici étendues aux nombres, considérés comme des mots, qui peuvent
-             comprendre, en outre, virgule et signe degré, comme dans "6,35" ou "37°2". De
-             plus, les nombres suivis, avec ou sans espace sécable, des signes "%, ‰" ou d'un
-             des glyphes monétaires "€, £, ¥ ou $" sont considérés comme un seul mot.
+             tiret, tiret inférieur, barre oblique, espace insécable, point forment un seul mot
+             comme "arc-en-ciel", "aujourd’hui", "O'Connor", "10/18" ou "www.societe.com". Ces
+             règles sont ici étendues aux nombres, considérés comme des mots, qui peuvent
+             comprendre, en outre, virgule et signe degré, comme dans "6,35" ou "37°2". De plus,
+             les nombres suivis, avec ou sans espace sécable, des signes "%, ‰" ou d'un des
+             glyphes monétaires "€, £, ¥ ou $" sont considérés comme un seul mot.
 
       vocabulaire
              ensemble des mots présents une ou plusieurs fois dans le texte. Cet ensemble
              correspond à la 'richesse spécifique' des études de diversité. Aucun regroupement
              n'est effectué : ainsi, tous les mots issus d'une même racine (conjugaison par
-             exemple) constituent autant de mots uniques différents constitutifs du
-             vocabulaire.
+             exemple) constituent autant de mots uniques différents constitutifs du vocabulaire.
 
       phrase
-             ensemble de signes se terminant par un point, un point d'interrogation ou un
-             point d'exclamation suivi d'une espace ou situé en fin de ligne.
+             ensemble de signes se terminant par un point, un point d'interrogation ou un point
+             d'exclamation suivi d'une espace ou situé en fin de ligne.
 
       syllabe
              mot court ou partie de mot comprenant au moins une voyelle.
 
       nombre de caractères de toute nature
-             le nombre de caractères de toute nature est la somme du nombre de caractères
-             composant les mots, du nombre d'espaces sécables, du nombre d'autres caractères
-             imprimables et du nombre de lignes.
+             le nombre de caractères de toute nature est la somme du nombre de caractères composant
+             les mots du nombre d'espaces sécables du nombre d'autres caractères imprimables et du
+             nombre de lignes.
 
       autres caractères imprimables
-             tout signe imprimable figurant à l'article 'ponctuation', autre que chiffres et
-             lettres, apostrophe, tiret, tiret inférieur, barre oblique, espace insécable et
-             point interne aux mots, point et virgule internes aux nombres, signes "%, ‰" et
-             glyphes monétaires quand ils suivent un nombre. Il en résulte qu'un signe
-             orphelin (supposons "%") sera considéré comme  un "autre" alors qu'il composera
-             un nom s'il suit un chiffre. La liste des autres  caractères ne comprend que les
-             plus utilisés. Il en existe des milliers d'autres qui apparaîtront alors comme
-             autant de mots.
+             tout signe imprimable figurant à l'article 'ponctuation', autre que chiffres et lettres,
+             apostrophe, tiret, tiret inférieur, barre oblique, espace insécable et point internes
+             aux mots, point et virgule internes aux nombres, signes "%, ‰" et glyphes monétaires
+             quand ils suivent un nombre. Il en résulte qu'un signe orphelin (supposons "%") sera
+             considéré comme  un "autre" alors qu'il composera un nom s'il suit un chiffre. La liste
+             des autres  caractères ne comprend que les plus utilisés. Il en existe des milliers
+             d'autres qui apparaîtront alors comme autant de mots.
 
       ponctuation
-             la notion de ponctuation est considérée lato sensu. Aux onze signes académiques
-             s'en ajoute de nombreux autres. La liste actuelle comprend les 72 suivants ! " #
-             % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ \` { | } ~ ¡ § « ° » ¿ × ÷ – ’ “ ”
-             ‰ − $ £ € ½ ¼ ʾ µ … · ² ³ ® ± ´ º ¥ © ¨ ¾ ¹ ¸ ª ¦ ¶ ¤ ¢ •
+             la notion de ponctuation est ici considérée lato sensu. Aux onze signes académiques s'en
+             ajoute de nombreux autres. La liste actuelle comprend les 72 suivants ! " # % & ' ( ) * +
+             , - . / : ; < = > ? @ [ \\ ] ^ _ \` { | } ~ ¡ § « ° » ¿ × ÷ – ’ “ ” ‰ − $ £ € ½ ¼ ʾ µ … ·
+             ² ³ ® ± ´ º ¥ © ¨ ¾ ¹ ¸ ª ¦ ¶ ¤ ¢ •
 
       charset
-             jeu de caractères, de l'anglais "character set", façon de représenter de manière
-             informatique une liste donnée de caractères. Ici, le charset du fichier original
-             est détecté par le logiciel (sauf si -c=CHARSET est défini) et converti ensuite
-             en utf-8 pour traitements. Le charset ISO_8859-1 est attribué par défaut aux
-             charsets non reconnus. Il est parfois nécessaire de le forcer à une autre valeur
-             en cas d'échec de conversion par 'iconv' ou de résultats aberrants.
+            jeu de caractères, de l'anglais "character set", façon de représenter de manière
+            informatique une liste donnée de caractères. Ici, le charset du fichier original est
+            détecté par le logiciel (sauf si -c=CHARSET est défini) et converti ensuite en
+            utf-8 pour traitements. Le charset ISO_8859-1 est attribué par défaut aux charsets non
+            reconnus. Il est parfois nécessaire de le forcer à une autre valeur en cas d'échec
+            de conversion par 'iconv' ou de résultats aberrants.
 
       ligne vide
             vide au sens visuel. Peut en réalité comprendre ou non des espaces.
@@ -267,19 +255,18 @@ cat << EOF
    INDICES DE LISIBILITE
              Les indices de lisibilité sont les indices classiques auxquels s'ajoute un indice
              spécifique. Ils sont toujours calculés avec leur formule canonique, mais à partir
-             de nombres de mots, syllabes et phrases qui respectent nos propres conventions.
-             Les éventuelles réserves sont exprimées ci-après. Les indices 'syllabiques'
-             exigent l'option -s qui demande un temps de calcul plus élevé que les indices
-             non-syllabiques. Ces derniers reposent sur la seule longueur des mots et des
-             phrases, tandis que les premiers font appel en outre au nombre de syllabes. Les
-             linguistes anglo-saxons font la correspondance entre ces indices et le niveau
-             d'éducation (grade level).
+             de nombres de mots, syllabes et phrases qui respectent nos propres conventions. Les
+             éventuelles réserves sont exprimées ci-après. Les indices 'syllabiques' exigent
+             l'option -s qui demande un temps de calcul plus élevé que les indices non-syllabiques.
+             Ces derniers reposent sur la seule longueur des mots et des phrases, tandis que les
+             premiers font appel en outre au nombre de syllabes. Les linguistes anglo-saxons font
+             la correspondance entre ces indices et le niveau d'éducation (grade level).
 
       indice spécifique
-             indice non syllabique. Le résultat va de 4 pour un niveau CP à plus de 19 pour
+             indice non syllabique. Le résultat va de 4 pour un niveau CP à plus de 18 pour
              'Le Discours de la Méthode'. Sa formule  est la suivante : longueur moyenne des
              mots moins 4,2 plus sept fois le logarithme népérien de la longueur moyenne des
-             phrases moins 8, le tout divisé par 1,2.
+             phrases moins 8 le tout divisé par 1,3.
 
       indice de Coleman-Liau
              indice non syllabique dû à Meri Coleman et T.L. Liau.
@@ -295,8 +282,8 @@ cat << EOF
              extrêmes ou devenir négatif.
 
       indice éducation de Flesh-Kincaid
-             indice syllabique, dû aux mêmes. Le niveau de cet indice est censé indiquer le
-             niveau d'étude nécessaire pour lire correctement un texte. Peut en réalité
+             indice syllabique, dû aux mêmes. Le niveau de cet indice est censé indiquer
+             le niveau d'étude nécessaire pour lire correctement un texte. Peut en réalité
              prendre des valeurs qui dépassent nettement les niveaux d'éducation.
 
       indice de Gunning-Fog
@@ -306,68 +293,66 @@ cat << EOF
              taires. L'indice est calculé ici sur la totalité du texte et non sur un extrait.
 
       indice SMOG
-             indice syllabique dû à G. Harry McLaughlin. Utilisé ici dans sa formule canonique
+             indice syllabique dû à G. Harry McLaughlin. Utilisé ici dans sa formule canonique,
              mais repose sur la totalité du texte et non sur des extraits.
 
    INDICES DE DIVERSITE
-             Les indices de diversité mesurent la richesse du vocabulaire employé. Ils
-             proviennent tous d'autres champs scientifiques que celui de la linguistique
-             (science économique, théorie de l'information et statistique).
+             Les indices de diversité mesurent la richesse du vocabulaire employé. Ils proviennent
+             tous d'autres champs scientifiques que celui de la linguistique (science économique,
+             théorie de l'information et statistique).
 
       indice de Gini
              fonction mathématique, due à Corrado Gini, pour mesurer l'inégalité des revenus,
-             adapté ici pour prendre en compte le poids des mots en fonction de leur
-             fréquence. Afin de le rendre plus intuitif, il est inversé (1-G), 0 correspondant
-             à une forte prépondérance des mots de grande fréquence, 1 à une égalité totale du
-             poids de tous les mots. Il varie donc dans le même sens que les indices de
-             diversité de Shannon et Simpson, mais ne mesure pas la même chose. Une variante
-             est ici adjointe en un indice hors happax.
+             adapté ici pour prendre en compte le poids des mots en fonction de leur fréquence.
+             Afin de le rendre plus intuitif, il est inversé (1-G), 0 correspondant à une forte
+             prépondérance des mots de grande fréquence, 1 à une égalité totale du poids de
+             de tous les mots. Il varie donc dans le même sens que les indices de diversité de
+             Shannon et Simpson, mais ne mesure pas la même chose. Une variante est ici adjointe
+             en un indice hors happax.
 
       indice de Shannon
-             fonction de mesure de l'entropie, due à Claude Shannon, à la base de la théorie
-             de l'information. Pour rendre cet indice plus cohérent avec les autres, il est
-             ici ramené de 0 à 1 (par division du résultat par le logarithme du vocabulaire).
-             Dès lors, 0 correspond à une diversité nulle des mots, 1 à une diversité totale.
+             fonction de mesure de l'entropie, due à Claude Shannon, à la base de la théorie de
+             l'information. Pour rendre cet indice plus cohérent avec les autres, il est ici
+             ramené de 0 à 1 (par division du résultat par le logarithme du vocabulaire). Dès
+             lors, 0 correspond à une diversité nulle des mots, 1 à une diversité totale.
 
       indice de Simpson
              fonction statistique, due à Edward Simpson, relative aux tirages au hasard. Les
-             'espèces' sont ici les mots du vocabulaire. Afin de rendre cet indice plus
-             intuitif et cohérent avec les deux autres, c'est en fait l'indice de diversité de
-             Simpson  qui est ici représenté, 0 correspondant à une diversité nulle des mots,
-             1 à une diversité totale. Par rapport à l'indice de Shannon, il majore
-             l'importance des mots de faible occurrence et notamment des happax.
+             'espèces' sont ici les mots du vocabulaire. Afin de rendre cet indice plus intuitif
+             et cohérent avec les deux autres, c'est en fait l'indice de diversité de Simpson
+             qui est ici représenté, 0 correspondant à une diversité nulle des mots, 1 à une
+             diversité totale. Par rapport à l'indice de Shannon, il majore l'importance des
+             mots de faible occurrence et notamment des happax.
 
 EOF
 echo -e "\e[1;97mAVERTISSEMENTS ET MISES EN GARDE\e[0m"
 cat << EOF
 
       réserves générales
-             le présent script est destiné à l'examen de fichiers textes en vue d'en
-             quantifier les composants principaux que sont les mots, leur décomposition en
-             syllabes, et les caractères. Il comporte des choix, qui peuvent être discutés. Il
-             n'a nulle prétention à l'exhaustivité : son usage se limite aux alphabets des
-             langues latines et aux textes plutôt littéraires. Il est moins opérant pour les
-             textes comportant des signes propres à une discipline particulière. La plus
-             grande liberté est laissée à l'usager, qui peut notamment cumuler tous les choix
-             d'options. Ces options peuvent être données dans n'importe quel ordre, mais
-             l'ordre d'exécution des commandes n'est pas déterminé par l'ordre des arguments.
-             Si l'option --help est présente, elle l'emporte sur toutes les autres et sera la
-             seule à être exécutée.
+             le présent script est destiné à l'examen de fichiers textes en vue d'en quantifier
+             les composants principaux que sont les mots, leur décomposition en syllabes, et
+             les caractères. Il comporte des choix, qui peuvent être discutés. Il n'a nulle
+             prétention à l'exhaustivité : son usage se limite aux alphabets des langues latines
+             et aux textes plutôt littéraires. Il est moins opérant pour les textes comportant
+             des signes propres à une discipline particulière. La plus grande liberté est laissée
+             à l'usager, qui peut notamment cumuler tous les choix d'options. Ces options peuvent
+             être spécifiées dans n'importe quel ordre. Si l'option --help est présente, elle
+             l'emporte sur toutes les autres et sera la seule à être exécutée.
 
       option -s
-             la mise en oeuvre de cette option entraîne des temps de traitement qui peuvent
-             être assez longs pour les textes volumineux. Elle est nécessaire au calcul des
-             indices syllabiques.
+             la mise en oeuvre de cette option entraîne des temps de traitement qui peuvent être
+             assez longs pour les textes volumineux. Elle est nécessaire au calcul des indices
+             syllabiques.
 
       option -m
              l'activation de l'option -m regroupe tous les blocs de trois chiffres des
              expressions monétaires pour en faire un seul mot par remplacement des espaces
-             simples par des insécables. Il en résulte une diminution du nombre d'espaces et
-             de mots et une augmentation de la longueur de ces derniers. Le nombre de points
-             et virgules inclus dans les mots est alors indiqué. Des effets indésirables
-             peuvent se produire : des suites de chiffres qui ne sont pas des expressions
-             monétaires peuvent être compactés (les expressions régulières ont des limites !).
-             L'activation de l'option -l permet de connaître le résultat des traitements.
+             simples par des insécables. Il en résulte une diminution du nombre d'espaces et de
+             mots et une augmentation de la longueur de ces derniers. Le nombre de points et
+             virgules inclus dans les mots est alors indiqué. Des effets indésirables peuvent se
+             produire : des suites de chiffres qui ne sont pas des expressions monétaires
+             peuvent être compactés (les expressions régulières ont des limites !). L'activation
+             de l'option -l permet de connaître le résultat des traitements.
 
       options -sc et -sd
              tous les caractères latins sont reconnus (notamment ceux propres aux alphabets
@@ -391,81 +376,62 @@ cat << EOF
              Le rapport du nombre de caractères, espaces, autres caractères au nombre d'octets
              n'est pas évident, un caractère pouvant correspondre de un à six octets selon le
              charcet. Seul l'us-acii assure l'égalité du nombre d'octets et de caractères. wc
-             peut faire apparaître un nombre de mots un peu supérieur, ce qui est normal
-             compte tenu de la définition très extensive de ce qu'est un mot pour wc.
+             peut faire apparaître un nombre de mots un peu supérieur, ce qui est normal compte
+             tenu de la définition très extensive de ce qu'est un mot pour wc.
 
              Les éventuelles séquences d'échappement non permises dans le texte source sont
              éliminées sans avertissement (FF entre autres).
 
-             Le rapprochement de la comptabilité en mots et en caractères peut être vérifié
-             par l'option -v. Cette vérification fait apparaître l'écart éventuel entre les
-             deux comptabilités.
+             Le rapprochement de la comptabilité en mots et en caractères peut être vérifié par
+             l'option -v. Cette vérification fait apparaître l'écart entre les deux compatilités.
 
-             Dans la répartition des mots par nombre de lettres, les mots de plus de 124
-             caractères ne sont pas affichés.
+             L'algorithme de syllabation a été retenu en raison de sa simplicité, de sa modularité
+             et de sa rapidité. Il ne cherche pas la perfection : par exemple les schwas ne sont
+             pas éliminés, la coupure apparaît parfois décalée et le nombre de syllabes est parfois
+             augmenté ou diminué d'une unité. Mais les erreurs se compensent et le nombre de
+             syllabes apparaîtra acceptable aux yeux du statisticien. La syllabation retenue est
+             propre à la langue et aux caractères français.
 
-             L'ordre alphabétique diffère en fonction de la définition de la langue par la
-             'locale' qui ne peut être modifiée sur certains systèmes. Il en résulte des
-             résultats qui peuvent varier de l'un à l'autre. La meilleure correspondance entre
-             systèmes passe par l'activation des options -sc et -sd lors des recherches de
-             fréquences de mots.
-
-             La translitération en PDF de quelques caractères particuliers n'est pas parfaite.
-             Ainsi, "œ" peut s'exprimer "½".
-
-             L'algorithme de syllabation a été retenu en raison de sa simplicité, de sa
-             modularité et de sa rapidité. Il ne cherche pas la perfection : par exemple les
-             schwas ne sont pas éliminés, la coupure apparaît parfois décalée et le nombre de
-             syllabes est parfois augmenté ou diminué d'une unité. Mais les erreurs se
-             compensent et le nombre de syllabes apparaîtra acceptable aux yeux du
-             statisticien. La syllabation retenue est propre à la langue et aux caractères
-             français.
-
-             Tous les résultats sont affichés au dix-millième mais sont calculés de manière
-             plus précise.
+             Tous les résultats sont affichés au dix-millième mais sont calculés de manière précise.
 
              La correspondance entre le niveau d'éducation et les indices de lisibilité (tous
              d'origine anglo-saxonne) n'a qu'une valeur limitée. Elle est dépourvue de toute
              signification pour certains indices dans les cas limites.
 
-             Les valeurs calculées par le présent script et par d'autres automates peuvent
-             être plus ou moins différentes en raison des différences de définition des
-             concepts et des méthodes utilisées.
+             L'ordre alphabétique des résultats dépend du système et du réglage des paramétres
+             régionaux.
 
-      bugs connus
-             une mauvaise translittération peut parfois se produite pour les 'locales' non
-             fr_FR, avec affichage du message "Invavid multibyte data detected. There may be
-             a mismatch between your data and your locale". Disparait en général lors d'une
-             relance de la commande.
+             Les valeurs calculées par le présent script et par d'autres automates peuvent être
+             plus ou moins différentes en raison des différences de définition des concepts et
+             des méthodes utilisées.
 
       limites (volume, temps d'exécution)
-             ce script permet de traiter des textes de grande taille. Sa vitesse et ses
-             capacités d'exécution dépendent des ressources de l'ordinateur utilisé. Compter
-             une à deux minutes par million de mots pour les analyses de mots et de caractères
-             avec un CPU à 3.60 GHz. Le volume des fichiers traitables dépend de la taille de
-             la mémoire. Compter un peu plus de 1,7 Go de mémoire par million de mots. Testé
-             pour des fichiers de 57 millions de mots. L'option -s est un peu longue ; le
-             calcul du nombre de syllabes et des indices syllabiques demandent entre une et
-             deux heures pour un roman de 150 000 mots. Les calculs de fréquences de mots et
-             de caractères ne prennent que quelques minutes pour des textes de cette taille,
-             mais ce temps augmente rapidement avec le volume des données à analyser.
+             ce script permet de traiter des textes de grande taille. Sa vitesse et ses capacités
+             d'exécution dépendent des ressources de l'ordinateur utilisé. Compter une à deux
+             minutes par million de mots pour les analyses de mots et de caractères avec un CPU
+             à 3.60 GHz. Le volume des fichiers traitables dépend de la taille de la mémoire.
+             Compter un peu plus de 1,7 Go de mémoire par million de mots. Testé pour des
+             fichiers de 57 millions de mots. L'option -s est un peu longue ; le calcul du nombre
+             de syllabes et des indices syllabiques demandent entre une et deux heures pour un
+             roman de 150 000 mots. Les calculs de fréquences de mots et de caractères ne prennent
+             que quelques minutes pour des textes de cette taille, mais ce temps augmente
+             rapidement avec le volume des données à analyser.
 
       exécutabilité
-             ce script a été réalisé sous GNU bash, version 5.1.0(1)-release-(x86_64-redhat-
-             linux-gnu). Il peut demander l'installation de certains modules (notamment 'file'
-             'iconv' 'bc' 'tput' ainsi que 'enscript' ou 'ps2pdfwr' pour l'édition des pdf),
-             modules en principe disponibles dans toutes les distributions de Linux.
+             ce script a été réalisé sous GNU bash, version 5.1.0(1)-release-(x86_64-redhat-linux
+             -gnu). Il peut demander l'installation de certains modules, disponibles dans toutes
+             les distributions Linux.
 
       bugs   merci de signaler bugs et suggestions à : paul at vidonne point fr
 
       licence
-             Copyright (c) $(date +%Y) Paul Vidonne. Ce script peut être librement exécuté,
-             diffusé et modifié dans les conditions de la 'Creative Commons Attribution-
-             NonCommercial-ShareAlike 3.0 Unported License' (CC-BY-NC-SA) publiée par Creative
-             Commons. Il est mis à disposition "tel quel", SANS AUCUNE GARANTIE de quelque
-             nature que ce soit et auprès de qui que ce soit. Plus d'informations (en anglais)
-             sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>, texte
-             intégral à  <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
+             Copyright (c) $(date +%Y) Paul Vidonne. Ce script peut être librement exécuté, diffusé et
+             modifié dans les conditions de la 'Creative Commons Attribution-NonCommercial
+             -ShareAlike 3.0 Unported License' (CC-BY-NC-SA) publiée par Creative Commons. Il
+             est mis à disposition "tel quel", SANS AUCUNE GARANTIE de quelque nature que ce
+             soit et auprès de qui que ce soit. Plus d'informations (en anglais) sur la licence
+             à <https://creativecommons.org/licenses/by-nc-sa/3.0/>, dont le texte intégral se
+             trouve à <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
 
 $(basename $0)                                        $version                                  ----
 EOF
@@ -479,6 +445,8 @@ if [ ! -t 0 ]; then
    donnees_brutes=$(cat | tr -d '\0'; echo)
    donnees_brutes=${donnees_brutes%x}
    donnees_brutes=$(sed 's/.*\x0a$//g' <<< "$donnees_brutes")
+   # élimination du caractère de remplacement : non, on élimine ts les accentués
+   # donnees_brutes=$(iconv -t //ignore 2>/dev/null <<< $donnees_brutes)
    donnees_source="::: Données pipées : $(basename $0) "
    donnees_origine="de l'entrée pipée"
    ligne_commande=$*
@@ -625,17 +593,13 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
          fi
          xxx_yyy=1
      elif [ ${arg:0:3} == "-y=" ]; then
-         if [ ${arg:5:1} ] ; then
-            echo -e "\n::: L'expression -y= ne doit contenir que deux chiffres. Abandon\n"
-            exit
-         fi
          yyy=${arg:3:2}
          if ! [[ $yyy == +([0-9]) ]] ; then
              echo -e "\n::: L'expression $yyy n'est pas un nombre. Abandon\n"
              exit
-         elif [ $yyy -gt 64 ]; then
-             echo -e "\n::: L'expression -y=$yyy est ramenée à -y=64. On continue\n"
-             yyy=64
+         elif [ $yyy -gt 14 ]; then
+             echo -e "\n::: L'expression -y=$yyy est ramenée à 14. On continue\n"
+             yyy=14
          elif [ $yyy ==  0 ]; then
              echo -e "\n::: L'expression -y=$yyy n'est pas possible. Abandon\n"
              exit
@@ -643,16 +607,9 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
          xxx_yyy=1
       elif [ ${arg:0:3} == "-c=" ]; then
          char_set=${arg:3:20}
-         iconv -l | grep -i -e "\b$char_set\b" >/dev/null
+         iconv -l | grep -i -e ^$char_set//$ >/dev/null
          if [ $? == 1 ] ; then
            echo -e "\n::: Le charset \"$char_set\" n'est pas reconnu. Abandon\n"
-           exit
-         fi
-      elif [ ${arg:0:4} == "-ic=" ]; then
-         char_set_i=${arg:4:21}
-         iconv -l | grep -i -e "\b$char_set_i\b" >/dev/null
-         if [ $? == 1 ] ; then
-           echo -e "\n::: Le charset \"$char_set_i\" n'est pas reconnu. Abandon\n"
            exit
          fi
       elif [ ${arg:0:1} != "-" ]; then
@@ -665,9 +622,8 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
              sha1=$(sha1sum $1 | cut -c 1-40)
          fi
    fi # de tous les if elif
-   done # tous les i in ligne de commande
+   done # i in ligne de commande
 
-      # vérification de la cohérence des arguments
       if [[ $lister_i_alpha == "1" || $lister_i_freq == "1" ]] && [ -z $fichier_fourni ]; then
           echo -e "\n::: Pas de fichier défini par -i= . Abandon\n"
           exit
@@ -751,8 +707,8 @@ if [ $type_entree == directe ]; then # on teste le fichier a analyser
       char_set=$(file -i "$1" | sed -e "s/.*charset=//")
    fi
    if [ "$char_set" == "unknown-8bit" ]; then
-       echo -e "\n::: Le charset de $1 est inconnu. Forcé à ISO_8859-1, il peut être"
-       echo -e "::: nécessaire de le redéfinir en cas d'échec de iconv ou de résultats aberrants"
+       echo -e "\n::: Le charset est inconnu. Forcé à ISO_8859-1, il peut être nécessaire de"
+       echo -e "::: le redéfinir en cas d'échec de iconv ou de résultats aberrants"
        char_set=ISO_8859-1
    fi
    if [ "$char_set" == "binary" ]; then
@@ -765,8 +721,7 @@ fi # fin entree directe
 if [ -t 0 ]; then
     # ici set -f marche
     set -f
-    IFS= read -rd '' donnees_brutes < $1
-    donnees_brutes=${donnees_brutes::-1}
+    donnees_brutes=$(cat $1)
 fi
 
 # fin test fichier analyse direct----test flux données si entree pipée----------------------
@@ -784,8 +739,8 @@ if [ $type_entree == pipee ]; then
    fi
 fi # avec dans les deux cas
 if [ "$char_set" == "unknown-8bit" ]; then
-    echo -e "\n::: Le charset de l'entrée pipée est inconnu. Forcé à ISO_8859-1, il peut être"
-    echo -e "::: nécessaire de le redéfinir en cas d'échec de iconv ou de résultats aberrants"
+    echo -e "\n::: Le charset est inconnu. Forcé à ISO_8859-1, il peut être nécessaire de"
+    echo -e "::: le redéfinir en cas d'échec de iconv ou de résultats aberrants"
     char_set=ISO_8859-1
 fi
 # fin test flux données--------------rappels ------------------------------------------------
@@ -796,7 +751,16 @@ fi
 # \xef\xbf\xbd = caractère de remplacement
 # (\x08 \b BS) - (\x09 \t HT) - (\x0a \n LF) - (\x0b \v VT)
 # (\x0c \f FF) - (\x0d \r CR) - (\c supprime le \n)
-# fin rappels -----------------------fonction : préliminaire---------------------------------
+# fin rappels -----------------------fonction : compter --------------------------------
+compter()
+{
+# établissement de la liste des caractères des données à analyser
+   liste_car2=$(echo $donnees | sed -r -e 's/(.?)/\1\n/g' | sed -r -e 's/ /\n/g' | sort -u)
+   echo -n "[$SECONDS] "> tmp$1
+   echo $liste_car2 >> tmp$1
+   unset $liste_car2
+}
+# fin compter -----------------------fonction : préliminaire--------------------------------
 preliminaire()
 {
    pleines=$(grep -v -c -E "^[[:space:]]*$" <<< "$donnees_brutes")
@@ -810,10 +774,13 @@ preliminaire()
 # fin préliminaire-------------------fonction : postliminaire-------------------------------
 postliminaire()
 {
-   msg_final="::: Temps d'exécution : $(($SECONDS/3600)) heure(s), $(($SECONDS%3600/60)) minute(s) et $(($SECONDS%60)) seconde(s)"
-   l_msg_final=${#msg_final}
-   l_fichier_sortie=${#fichier_sortie}
 if [ $fichier_sortie != /dev/null ] ; then
+   if ! [ -f $fichier_sortie ] || ! [ -s $fichier_sortie ] ; then
+      echo -e "\n::: Le fichier '$fichier_sortie' n'existe pas, ou il est vide." | tee -a $fichier_sortie
+   else
+     taille=$(ls -l $fichier_sortie | awk -F" " '{print $5 " octets - " $6 " " $7 " " $8}')
+     echo -e "\n::: Fichier $fichier_sortie : créé ($taille)" | tee -a $fichier_sortie
+  fi
   if [ $option_csv == 1 ] ; then
      if ! [ -f $fichier_sortie.csv ] || ! [ -s $fichier_sortie.csv ] ; then
        echo -e "\n::: Le fichier '$fichier_sortie.csv' n'existe pas, ou il est vide." | tee -a $fichier_sortie
@@ -824,30 +791,12 @@ if [ $fichier_sortie != /dev/null ] ; then
   fi
   if [ $option_pdf == 1 ] ; then
      if ! [ -f $fichier_sortie.pdf ] || ! [ -s $fichier_sortie.pdf ] ; then
-        type enscript &>/dev/null && type ps2pdfwr &>/dev/null
-        if [ $? == 0 ]; then
-           echo -e "\n::: Fichier $fichier_sortie.pdf : en cours de création ($(date  +%e" "%b" "%k:%M))" | tee -a $fichier_sortie
-        else
-           echo -e "\n::: Fichier '$fichier_sortie.pdf' non créé : manque 'enscript' et/ou 'ps2pdfwr'" | tee -a $fichier_sortie
-       fi
+       echo -e "\n::: Le fichier '$fichier_sortie.pdf' n'existe pas, ou il est vide." | tee -a $fichier_sortie
      else
        taille=$(ls -l $fichier_sortie.pdf | awk -F" " '{print $5 " octets - " $6 " " $7 " " $8}')
        echo -e "\n::: Fichier $fichier_sortie.pdf : créé ($taille)" | tee -a $fichier_sortie
      fi
   fi
-   if ! [ -f $fichier_sortie ] || ! [ -s $fichier_sortie ] ; then
-      echo -e "\n::: Le fichier '$fichier_sortie' n'existe pas, ou il est vide." | tee -a $fichier_sortie
-   else
-     octets_sortie=$(wc -c < $fichier_sortie)
-     l_octets_sortie=${#octets_sortie}
-     l_total=$(( octets_sortie + l_fichier_sortie + l_msg_final + l_octets_sortie + l_octets + 52 ))
-     taille=$(ls -l $fichier_sortie | awk -v N="$l_total" -F" " '{print N " octets - " $6 " " $7 " " $8}')
-     echo -e "\n::: Fichier $fichier_sortie : créé ($taille)" | tee -a $fichier_sortie
-  fi
-fi
-echo -e "\n$msg_final\n" | tee -a $fichier_sortie
-if [ "$option_pdf" == "1" ] ; then
-   mots2pdf "$@"
 fi
 }
 # fin postliminaire -----------------fonction : petites fct suppression---------------------
@@ -887,14 +836,12 @@ syllabeur()
        echo -e "::: Mots analysés : $nb_mots - Temps passé : $(($SECONDS/3600)) heure(s), $(($SECONDS%3600/60)) minute(s) et $(($SECONDS%60)) seconde(s)\n " ;
        exit' HUP INT
    echo "$(setterm -cursor off)"
-   nb_total_mots=$(echo $donnees | sed 's/./&\n/g' | grep -c " ")
-   nb_total_mots=$(($nb_total_mots +1))
    if [ $lister_liste == 1 ] ; then
       echo -e "::: Nombre de syllabes par mot" | tee -a $fichier_sortie
       echo -e "::: Rang;nombre;syllabes et symboles" | tee -a $fichier_sortie
    fi
    # les donnees sont réduites aux minuscules non accentuées. L'algorithme est adapté de
-   # celui de Pailler [1999] qui porte sur les phonèmes et non sur les syllabes d'un texte
+   # celui de Pailler [1999] qui porte sur les phonèmes et non sur l'alphabet
    donnees_ori=$donnees
    bas_de_casse
    supp_diacritique
@@ -939,13 +886,13 @@ syllabeur()
        if [ $lister_liste == 1 ] ; then
           echo $nb_mots" "$sortie | tee -a $fichier_sortie
        else
-          tput sc
-          echo -e -n "::: Calcul des syllabes. Ctrl-c pour interrompre. Mots analysés : $nb_mots (sur $nb_total_mots)"
-          tput rc
+          echo -e -n "\033[s"
+          echo -e -n "::: Calcul du nombre de syllabes en cours. Ctrl-c pour interrompre. Nombre de mots analysés :  $nb_mots"
+          echo -e -n "\033[u"
        fi
        sortie2=$sortie2$sortie
-   done
-   # sortie de la grande boucle for mots in donnees ; on peut alors comptabiliser les syllabes
+   done # on est sorti de la gande boucle for mots in donnees
+   # on peut alors comptabiliser les syllabes
    sortie2=$(sed -e 's/:::/\n:::/g' <<< $sortie2)
    numcol=2
    nb_syllabes=$(awk -F ' ' -v champ="$numcol" '{ total += $champ } END {print total}' <<<$sortie2)
@@ -970,6 +917,7 @@ syllabeur()
    trap "echo ;exit" HUP INT # retour à l'état par défaut
 }
 # fin syllabeur----------------------fonction : nb per mots---------------------------------
+# deux fonctions car difficile de passer des parametres avec init_tab_awk
 nb_per_mots()
 {
    # Paramètre pour initialiser le script awk.
@@ -980,7 +928,7 @@ nb_per_mots()
       # A passer comme paramètres au script awk ci-dessous.
       compteur=$(expr $compteur + 1)
    done
-   # echo $init_tab_awk | sed 's/tab_jeton/\ntab_jeton/g' # pour debug
+   # echo $init_tab_awk | sed 's/tab_jeton/\ntab_jeton/g'; # pour debug
    awk \
    "BEGIN { $init_tab_awk } \
    { split(\$0, tab, \" \"); \
@@ -1003,7 +951,7 @@ nb_per_char()
       # A passer comme paramètres au script awk ci-dessous.
       compteur=$(expr $compteur + 1)
    done
-   # echo $init_tab_awk | sed 's/tab_jeton/\ntab_jeton/g' # pour debug
+   # echo $init_tab_awk | sed 's/tab_jeton/\ntab_jeton/g'; # pour debug
    awk \
    "BEGIN { $init_tab_awk } \
    { split(\$0, tab, \"\"); \
@@ -1048,6 +996,7 @@ operations_monetaires()
    donnees=$(sed  -r -e 's/( |^)([0-9]{1,3}) ([0-9]{3}[^)($|[^0-9])/\1\2\xe2\x80\xaf\3/g' \
                      -e 's/([0-9]{3}) ([0-9]{3}[^)($|[^0-9])/\1\xe2\x80\xaf\2/g' \
                      -e 's/([0-9]{3}) ([0-9]{3}[^)($|[^0-9])/\1\xe2\x80\xaf\2/g' <<< $donnees)
+
    esp_apres=$(echo $donnees | sed 's/./&\n/g' | grep -c " ")
    esp_monetaires=$(($esp_avant - $esp_apres))
    # comptage  point et virgule monétaires
@@ -1058,32 +1007,40 @@ operations_monetaires()
 filtrer()
 {
 donnees_int=$1
-   # suppression des points sauf dans les nombres et les mots
-   donnees_int=$(gawk '{ print gensub(/(^|[^[a-zA-Z0-9])\.+([^a-z]|$)/, "\\1 \\2", "g", $0) }' <<< $donnees_int)
-   # suppression des virgules sauf dans les nombres (US style)
-   donnees_int=$(gawk '{ print gensub(/(^|[^0-9]),+([^0-9]|$)/, "\\1 \\2", "g", $0) }' <<< $donnees_int)
-   # suppression des points et virgules qui subsistent en fin de mot et de ligne
-   donnees_int=$(gawk '{ print gensub(/(\.+|,+)([\x20\x0a\x0d\x0a]|$)+/, " ", "g", $0) }' <<< $donnees_int)
-   # suppression des degrés sauf dans les nombres
-   donnees_int=$(gawk '{ print gensub(/(^|[^0-9])°+([^0-9]|$)/, "\\1 \\2", "g", $0) }' <<< $donnees_int)
-   # Suppression des slashs =sauf dans les nombres et les mots=
-   donnees_int=$(gawk '{ print gensub(/(^| )\/+|\/+([^a-zA-Z0-9]|$)/, "\\1 \\2", "g", $0) }' <<< $donnees_int)
-   # Suppression de % non suivi d'une espace
-   donnees_int=$(gawk '{ print gensub(/(‰|%)([^ ]+)/, " \\2", "g", $0) }' <<< $donnees_int)
-   # Suppression des % dont le prédécesseur n'est pas un nombre avec ou sans espace
-   donnees_int=$(gawk '{ print gensub(/([^0-9 ])(%|‰)/, "\\1 ", "g", $0) }' <<< $donnees_int)
-   # Suppression du reste des % sans toucher aux formes conservées type 12,5% ou 12 %
-   donnees_int=$(gawk '{ print gensub(/([^0-9] )[%|‰]( )/, "\\1\\2", "g", $0) }' <<< $donnees_int)
-   # Remplacement des espaces par des insécables fines  pour les % et les glyphes monétaires
-   donnees_int=$(gawk '{ print gensub(/([0-9])( )([$€¥£%‰])/, "\\1\xe2\x80\xaf\\3", "g", $0) }' <<< $donnees_int)
-   # Suppression des glypes monétaires isolés
-   donnees_int=$(gawk '{ print gensub(/([^0-9] )[$£€¥]+( |$)/, "\\1\\2", "g", $0) }' <<< $donnees_int)
-   # Reste des autres suppressions
-   donnees_int=$(gawk '{ print gensub(/\xe2\x80\x99{2,}|ʾ| \xe2\x80\x99|\xe2\x80\x99 |“|”|<|=|>|;|:|\(|\)|\[|\]|\{|\}|!|\?|"| -|- |-{2,}|@|#|\*/, " ", "g", $0) }' <<< $donnees_int)
-   donnees_int=$(gawk '{ print gensub(/ _|_ |_{2,}|\||§|&|~|\^|`|µ|\+|\xe2\x80\x93|−|«|»|½|¼|÷|×|¡|¿|…|·|²|³|®|±|\\´|º|©|¨|¾|¹|¸|ª|¦|¶|¤|¢|•/, " ", "g", $0) }' <<< $donnees_int)
-   # suppression apostrophe x27 sauf dans les mots
-   donnees_int=$(gawk '{ print gensub(/([[:space:]][\x27]|[[:punct:]][\x27]|[\x27][[:space:]]|[\x27][[:punct:]])/, " ", "g", $0) }' <<<$donnees_int)
-   donnees_int=$(gawk '{ print gensub(/([^[:alnum:]][\x27]|[\x27]$)/, " ", "g", $0) }' <<< $donnees_int)
+      # suppression des points sauf dans les nombres et les mots
+      donnees_int=$(sed -r -e 's/(^|[^[a-zA-Z0-9])\.+([^a-z]|$)/\1 \2/g' <<< $donnees_int)
+      # suppression des virgules sauf dans les nombres (US style)
+      donnees_int=$(sed -r -e 's/(^|[^0-9])\,+([^0-9]|$)/\1 \2/g' <<< $donnees_int)
+      # suppression des points et virgules qui subsistent en fin de mot et de ligne
+      donnees_int=$(sed -r -e 's/(\.|,)([\x20\x0a\x0d\x0a]|$)+/ /g' <<< $donnees_int)
+      # suppression des degrés sauf dans les nombres
+      donnees_int=$(sed -r -e 's/(^|[^0-9])°([^0-9]|$)/\1 \2/g' <<< $donnees_int)
+      # Suppression des slashs =sauf dans les nombres et les mots=
+      donnees_int=$(sed -r -e "s/(^| |$accent_tous)\/+|\/+([^a-zA-Z0-9]|$)/\1 \2/g" <<< $donnees_int)
+      # Suppression de % =non suivi d'une espace
+      donnees_int=$(sed -r -e 's/(‰|%)([^ ]+)/ \2/g' <<< $donnees_int)
+      # Suppression des % dont le prédécesseur n'est pas un nombre avec ou sans espace
+      donnees_int=$(sed -r -e 's/([^0-9 ])(%|‰)/\1/g' <<< $donnees_int)
+      # Suppression du reste des % sans toucher aux formes conservées type 12,5% ou 12 %
+      donnees_int=$(sed -r -e 's/([^0-9] )[%|‰]( )/\1\2/g' <<< $donnees_int)
+      # Remplacement des espaces par des insécables fines  pour les % et les glyphes monétaires (variante sed)
+      donnees_int=$(sed -r -e 's/([0-9])[ ](%|‰|\$|£|€|¥)/\1\xe2\x80\xaf\2/g' <<< $donnees_int)
+      # Remplacement des espaces par des insécables fines  pour les % et les glyphes monétaires (variante gawk)
+      # donnees_int=$(gawk -v a="$donnees_int" 'BEGIN { b = gensub(/([0-9])( )([$€¥£%‰])/, "\\1\xef\xbf\xbd\\3", "g", a) ; print b }')
+      # Suppression des glypes isolés. En une seule passe, ça ne passe pas !
+      donnees_int=$(echo $donnees_int | sed -r -e 's/([^0-9] )[£]( |$)/\1\2/g')
+      donnees_int=$(echo $donnees_int | sed -r -e 's/([^0-9] )+[£]( |$)/\1\2/g')
+      donnees_int=$(echo $donnees_int | sed -r -e 's/([^0-9] )[$]( |$)/\1\2/g')
+      donnees_int=$(echo $donnees_int | sed -r -e 's/([^0-9] )+[$]( |$)/\1\2/g')
+      donnees_int=$(echo $donnees_int | sed -r -e 's/([^0-9] )[€]( |$)/\1\2/g')
+      donnees_int=$(echo $donnees_int | sed -r -e 's/([^0-9] )+[¥]( |$)/\1\2/g')
+      donnees_int=$(echo $donnees_int | sed -r -e 's/([^0-9] )[€]( |$)/\1\2/g')
+      donnees_int=$(echo $donnees_int | sed -r -e 's/([^0-9] )+[¥]( |$)/\1\2/g')
+      # Reste des autres suppressions
+      donnees_int=$(echo $donnees_int | sed -r -e 's/\xe2\x80\x99{2,}|ʾ| \xe2\x80\x99|\xe2\x80\x99 |“|”|<|=|>|;|:|\(|\)|\[|\]|\{|\}|!|\?|\"| -|- |-{2,}|@|#|\*| _|_ |_{2,}|\||§|&|~|\^|`|µ|\+|\xe2\x80\x93|−|«|»|½|¼|÷|×|¡|¿|…|·|²|³|®|±|\´|º|©|¨|¾|¹|¸|ª|¦|¶|¤|¢|•/ /g' )
+      # suppression apostrophe x27 sauf dans les mots
+      donnees_int=$(echo $donnees_int | sed -r -e 's/([[:space:]][\x27]|[[:punct:]][\x27]|[\x27][[:space:]]|[\x27][[:punct:]])/ /g' )
+      donnees_int=$(sed -r -e 's/([^[:alnum:]][\x27]|[\x27]$)/ /g' <<< $donnees_int)
 }
 # fin filtrer------------------------fonction : analyse par mots commun---------------------
 analyse_par_mots_commun()
@@ -1205,7 +1162,7 @@ analyse_par_mots_detail()
       echo -e "::: Rang;longueur en lettres; nombre de mots" | tee -a $fichier_sortie
       rang=0
       sortie=$(sed -e 's/ /\n/g' <<< $sortie)
-      for valeur in $(seq 1 124) ; do
+      for valeur in $(seq 1 26) ; do
          compt=$(awk -F ' ' -v value="$valeur" '{if($1 == value) {cpt+=1}} END {print cpt}' <<< "$sortie" )
          if [ $compt ] ; then
             let rang++
@@ -1223,7 +1180,7 @@ analyse_par_mots_detail()
    if [ $type == texte ]; then
       autres=$(($nb_total_punct - $nb_punct_dans_mots))
       moy_phrase=$(echo "scale=5; $nb_mots/$nb_total_phrases" | bc -l)
-      complexite=$(echo "scale=5; ($moy_car - 4.2 + 7*l($moy_phrase) - 8)/1.2" | bc -l)
+      complexite=$(echo "scale=5; ($moy_car - 4.2 + 7*l($moy_phrase) - 8)/1.3" | bc -l)
       coleman=$(echo "scale=5; (5.88*$moy_car - 0.296*(100/$moy_phrase) - 15.8)" | bc -l)
       ari=$(echo "scale=5; (4.71*$moy_car + 0.5*$moy_phrase - 21.43)" | bc -l)
       # après calcul on limite le nb de décimales, mais printf depend de la locale séparateur
@@ -1269,7 +1226,7 @@ analyse_par_mots_detail()
          moy_indices=$(echo "scale=2; ($complexite+$coleman+$ari+$flesh_2+$gunning+$smog)/6" | bc -l)
       fi
    fi
-   echo -e "\n::: Analyse du détail des mots :::" | tee -a $fichier_sortie
+   echo -e "\n::: Analyse par détail des mots :::" | tee -a $fichier_sortie
    echo -e "$donnees_source$ligne_commande | Type : $type | Charset : $char_set | Octets : $octets" | tee -a $fichier_sortie
    if [ $type == texte ]; then
       echo "::: Lignes : $total_lignes | Dont vides : $vides | Espaces sécables : $espaces | Autres car. impr. $supp_ajout: $autres"  | tee -a $fichier_sortie
@@ -1309,10 +1266,10 @@ analyse_par_caracteres()
 {
    set -f
    # Suppression de CR LL FF non breaking space normal et fine
-   donnees=$(gawk '{ print gensub(/[\x0a\x0d\x0c\xc2\xa0\xe2\x80\xaf]/, " ", "g", $0) }' <<< $donnees_brutes)
+   donnees=$(echo $donnees_brutes | sed 's/[\x0a\x0d\x0c\xc2\xa0\xe2\x80\xaf]/ /g')
    # passage iconv (ne convertit pas les CR LF FF)
    donnees=$(iconv -c -f $char_set -t utf-8 <<< $donnees)
-   echo
+  echo
       if [ "$supp_chiffre" == "1" ];then
          supp_chiffre
          echo "::: Suppression des chiffres c"
@@ -1329,47 +1286,32 @@ analyse_par_caracteres()
          supp_punct
          echo "::: Suppression de la ponctuation c"
       fi
-   # établissement ici de la liste des caractères des données à analyser. Le découpage en tranches
-   # est  destiné à prévenir la 'génération spontanée' de caractères corrompus de type ef bf bd
-   nb_mots_1=$(echo $donnees | sed 's/./&\n/g' | grep -c " ")
-   nb_mots_1=$(($nb_mots_1 + 1))
-   passe=$(($nb_mots_1 / 10000 + 1 ))
-   debut=1
-   pas=9999
-   i=0
-   while [ "$i" -lt "$passe" ] ; do
-      i=$(($i + 1))
-      liste_car_=$(echo $donnees | cut -f $debut-$(($debut + $pas)) --delimiter=" ")
-      liste_car_=$(gawk '{ print gensub(/(.?)/, "\\1\n", "g", $0) }' <<< $liste_car_)
-      liste_car_=$(gawk '{ print gensub(/( )/, "\\1\x0a", "g", $0) | "sort -u" }' <<< $liste_car_)
-      # indispensable antislashage de \ (pas évident) ` et "
-      liste_car_=$(gawk '{ print gensub(/(\\)/, "\\1\\1", "g", $0) }' <<< $liste_car_)
-      liste_car_=$(gawk '{ print gensub(/`/, "\\\\`", "g", $0) }' <<< $liste_car_)
-      liste_car_=$(gawk '{ print gensub(/(")/, "\\\\\\1", "g", $0) }' <<< $liste_car_)
-      liste_car_=$(echo ${liste_car_:1})
-      liste_car="$liste_car $liste_car_"
-      liste_car=$(echo $liste_car | sed -e 's/ /\n/g' | sort -u)
-      debut=$(($debut + $pas +1))
-   done
-   l_liste_tmp=$(echo $liste_car | sed 's/./&\n/g' | grep -c " ")
+   # établissement ici de la liste des caractères des données à analyser
+   liste_car=$(sed -r -e 's/(.?)/\1\n/g' <<< $donnees)
+   liste_car=$(echo $liste_car | sed -r -e 's/ /\n/g' | sort -u)
+   # indispensable antislashage de \ (pas évident) ` et "
+   liste_car=$(echo $liste_car | sed -r -e 's/[\x5c]/\\\\/g' | sed -r -e 's/`/\\`/g' | sed -r -e 's/"/\\"/g')
+   l_liste_tmp=$(echo "$liste_car" | sed 's/./&\n/g' | grep -c " ")
    l_liste_tmp=$(($l_liste_tmp + 1))
-   # la fct nb_per_char retourne les caractères de $liste_car présents dans $donnees avec leur nombre
    resultats=$(nb_per_char)
+   # echo "resultats :"$resultats
    # nb_char_dans_car est la somme des nombres des caractères listés
+   # nb_chars_dans_car=$(echo $(expr match "$resultats" '.*\( [0-9]*\)'))
+   # nb_chars_dans_car=$(echo $resultats | sed -r -e 's/.*Total : ([0-9]*)$/\1/g')
    nb_chars_dans_car=$(echo $resultats | sed -r -e 's/.*Total : //g')
-   # le test suivant prévient notamment des dépassements de mémoire
    if [ -z $nb_chars_dans_car ] ; then
       echo -e "\n::: Ligne ${LINENO} : variable 'nb_total_punct' non définie. Abandon\n" | tee -a $fichier_sortie
       echo -e "::: Temps passé : $(($SECONDS/3600)) heure(s), $(($SECONDS%3600/60)) minute(s) et $(($SECONDS%60)) seconde(s)\n " | tee -a $fichier_sortie
       exit
    fi
-   echo -e "::: Analyse des caractères :::" | tee -a $fichier_sortie
+   echo -e "\n::: Analyse par caractères :::" | tee -a $fichier_sortie
    if [ $lister_c_alpha == 1 ] && [ $lister_liste == 1 ] ; then
       echo -e "::: Caractères comptabilisés : "$liste_car | tee -a $fichier_sortie
       echo -e "::: Fréquence des caractères (par ordre alphabétique)" | tee -a $fichier_sortie
       echo -e "::: Rang;fréquence;caractère" | tee -a $fichier_sortie
       resultats=$(sort -t " " -k 4b,4 -k 2rn,2 <<< $resultats)
       resultats=$(sed -r -e '/Total.*$/d' <<< sed -r -e '/^ $/d' <<< $resultats)
+      # resultats=$(echo $resultats | sed -r -e '/^ $/d' | sed -r -e '/Total.*$/d')
       if [ $option_csv == 0 ] ;then
          awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "= " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -r -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
       else
@@ -1391,7 +1333,7 @@ analyse_par_caracteres()
          echo "$resultats" | nl | sed -r -e 's/^\s*([0-9]*)\x09/\1 /g' >> $fichier_sortie
       fi
    fi
-   echo -e "\n::: Analyse des caractères :::" | tee -a $fichier_sortie
+   echo -e "\n::: Analyse par caractères :::" | tee -a $fichier_sortie
    echo -e "$donnees_source$ligne_commande " | tee -a $fichier_sortie
    echo -e "::: Nombre de caractères (espaces non compris) : "$l_liste_tmp | tee -a $fichier_sortie
    echo -e "::: Nombre d'occurrences de ces caractères : "$nb_chars_dans_car | tee -a $fichier_sortie
@@ -1414,7 +1356,7 @@ affichage_frequence()
       taux_u_=$(printf "%.2f\n" $taux_u)
    fi
    taux_u=${taux_u_/,/.}
-   echo -e "\n::: Analyse de la fréquence des mots :::" | tee -a $fichier_sortie
+   echo -e "\n::: Analyse par fréquence des mots :::" | tee -a $fichier_sortie
    echo -e "$donnees_source$ligne_commande" | tee -a $fichier_sortie
    echo -e "::: Nombre de mots "$donnees_origine ": $nb_mots_avant" | tee -a $fichier_sortie
    echo -e "::: Nombre de mots du vocabulaire $du_fichier_fourni: $nb_mots_1 - Taux vocabulaire/total : $taux_u %" | tee -a $fichier_sortie
@@ -1441,7 +1383,7 @@ while [ "$i" -lt "$passe" ] ; do
    echo -e "::: $(date '+%H:%M:%S') - Passe $i sur $passe"
    liste_mots=$(echo $liste_mots_1 | cut -f $debut-$(($debut + $pas)) --delimiter=" ")
    resultats=$(nb_per_mots)
-   # echo $resultats | sed 's/:::/\n:::/g'
+   #echo $resultats | sed 's/:::/\n:::/g'
    variable_boucle=$(echo $resultats | sed 's/:::/\n:::/g' | sed 's/ $//g')
    debut=$(($debut + $pas +1 ))
    variable_tmp=("$variable_tmp $variable_boucle")
@@ -1481,7 +1423,7 @@ analyse_par_mots_frequence()
    # établissement de la liste des mots index à appliquer aux données à analyser
    nb_mots_avant=$(echo $donnees | sed 's/./&\n/g' | grep -c " " 2>/dev/null)
    nb_mots_avant=$(($nb_mots_avant +1))
-   echo -e "\n::: Analyse de la fréquence des mots :::" | tee -a $fichier_sortie
+   echo -e "\n::: Analyse par fréquence des mots :::" | tee -a $fichier_sortie
    # on sépare les cas fichier fourni ou non
    # on traite les deux cas de demande de frequence du texte ou xxx
    if [[ $lister_f_alpha == "1" || $lister_f_freq == "1" || $lister_x_alpha == "1" || $lister_x_freq == "1" ]] ; then
@@ -1493,15 +1435,14 @@ analyse_par_mots_frequence()
       # liste_mots_1 est la liste des mots singuliers provenant du texte
       liste_mots=$(awk "BEGIN { $tableau_awk } { split(\$0, tab, \" \"); for (mots in tab) { print tab[mots] } }" <<< $donnees )
       liste_mots_1=$(echo $liste_mots | tr ' ' '\n' | sort -u)
+      # la fonction calcul_variable_temp incorporait l'édition alpha. Mais avant on neutralise
       # lister_i_alpha pour eviter edition indue dans la fonction lors d'un appel avant fichier_fourni
       if [ $lister_i_alpha == 1 ] ; then
          lister_i_alpha=0
          lister_i_alpha_tmp=1
       fi
-
       calcul_variable_temp
       calcul_indice "$variable_temp" "supp_l1"
-
       hapax=$(echo "$variable_temp" | grep "::: 1 " 2>/dev/null | wc -l)
       if [ $lister_i_alpha_tmp == 1 ] ; then
          lister_i_alpha=1
@@ -1568,17 +1509,12 @@ analyse_par_mots_frequence()
    # on traite alors l'option fichier fourni
    if [[ $lister_i_alpha == "1" || $lister_i_freq == "1" ]] ; then
       echo -e "\n::: les mots indexés sont ceux du fichier '$fichier_fourni'" | tee -a $fichier_sortie
-      # Liste_mots_1 fournie. On traite le charcet et on la nettoie
+      # Liste_mots_1 fournie. On commence par la nettoyer
+      # traitement du charset du fichier fourni
       liste_mots_1=$(cat $fichier_fourni)
-      if [ $char_set_i ] ; then
-         char_set_fichier_fourni=$char_set_i
-      else
-         char_set_fichier_fourni=$(file -i "$fichier_fourni" | sed -e "s/.*charset=//")
-         if [ "$char_set_fichier_fourni" == "unknown-8bit" ]; then
-            echo -e "\n::: Le charset de $fichier_fourni est inconnu. Forcé à ISO_8859-1, il peut être"
-            echo -e "::: nécessaire de le redéfinir en cas d'échec de iconv ou de résultats aberrants"
-            char_set_fichier_fourni=ISO_8859-1
-         fi
+      char_set_fichier_fourni=$(file -i "$fichier_fourni" | sed -e "s/.*charset=//")
+      if [ "$char_set_fichier_fourni" == "unknown-8bit" ]; then
+        char_set_fichier_fourni=ISO_8859-1
       fi
       liste_mots_1=$(iconv -c -f $char_set_fichier_fourni -t utf-8 <<< $liste_mots_1)
       # ici il est plus simple de ne pas passer par une fct pour les suppressions
@@ -1637,15 +1573,16 @@ verification()
       balance=$(($car_in_mots - $espaces - $nb_chars_dans_car))
    fi
    if [ $balance == 0 ] ;then
-      echo "::: Les résultats des analyses par mots et par caractères correspondent" | tee -a $fichier_sortie
-      echo "::: Les chiffres donnés peuvent être tenus pour justes (pour les arguments donnés)" | tee -a $fichier_sortie
+      echo "::: Les résultats de l'analyse par mots et par caractères correspondent" | tee -a $fichier_sortie
+      echo "::: Les chiffres donnés peuvent être tenus pour justes" | tee -a $fichier_sortie
    fi
    if [ $balance -lt 0 ] ;then
-      echo "::: Les résultats des analyses par mots et par caractères ne correspondent pas ($balance)" | tee -a $fichier_sortie
+      echo "::: Les résultats de l'analyse par mots et par caractères ne correspondent pas ($balance)" | tee -a $fichier_sortie
       echo -e "::: Des éléments du fichier de données '"$1"' ne sont pas connus du module d'analyse par mots ($balance)" | tee -a $fichier_sortie
+      echo "::: Les chiffres de l'analyse par caractères sont justes" | tee -a $fichier_sortie
    fi
    if [ $balance -gt 0 ] ;then
-      echo "::: Les résultats des analyses par mots et par caractères ne correspondent pas ($balance)" | tee -a $fichier_sortie
+      echo "::: Les résultats de l'analyse par mots et par caractères ne correspondent pas ($balance)" | tee -a $fichier_sortie
       echo "::: Raison incertaine, merci de signaler ce cas" | tee -a $fichier_sortie
    fi
    echo "::: ----------------------------------------------------------------------------"
@@ -1665,11 +1602,27 @@ mots2csv()
 # fin mots2csv ----------------------fonction : mots2pdf-----------------------------------
 mots2pdf()
 {
-   type enscript &>/dev/null && type ps2pdfwr &>/dev/null
+   type enscript &>/dev/null
    if [ $? == 0 ]; then
+      taille=$(ls -l $fichier_sortie | awk -F" " '{print $5 " octets - " $6 " " $7 " " $8}')
+      echo -e "\n::: Fichier $fichier_sortie : créé ($taille)" >> $fichier_sortie
+      if [ $option_csv == 1 ] ; then
+         taille=$(ls -l $fichier_sortie.csv | awk -F" " '{print $5 " octets - " $6 " " $7 " " $8}')
+         echo -e "\n::: Fichier $fichier_sortie.csv : créé ($taille)" >> $fichier_sortie
+      fi
+      echo -e "\n::: Fichier $fichier_sortie.pdf : en cours de création ($(date '+%d %b %X'))" >> $fichier_sortie
+      echo -e "\n::: Temps passé : $(($SECONDS/3600)) heure(s), $(($SECONDS%3600/60)) minute(s) et $(($SECONDS%60)) seconde(s)\n " >> $fichier_sortie
       # la "mauvaise" apostrophe fait planter iconv, donc la transforme. Les autres mauvais char sont supprimé par -c
-      cat $fichier_sortie | sed -r -e "s/\’/\'/g" | enscript --output=- --filter="iconv -c -f utf-8 -t ISO-8859-15//TRANSLIT" \
+      cat $fichier_sortie | sed -r -e "s/\’/\'/g" | enscript --output=- --filter="iconv -c -f utf-8 -t ISO-8859-1" \
           -B --margin=20:5:5:5: -f Helvetica@9/10 -j 2>/dev/null | ps2pdfwr - > $fichier_sortie.pdf
+      # il faut maintenant supprimer les n dernieres lignes du fichier de sortie
+      if [ $option_csv == 0 ] ; then
+         sed -n -e :a -i -e '1,7!{P;N;D;};N;ba' $fichier_sortie
+      else
+         sed -n -e :a -i -e '1,9!{P;N;D;};N;ba' $fichier_sortie
+      fi
+   else
+      echo -e "\n::: Il faut installer 'enscript'. Le fichier $fichier_sortie.pdf ne peut pas être généré"
    fi
 }
 # fin mots2pdf ----------------------main--------------------------------------------------
@@ -1694,7 +1647,10 @@ fi
 if [ "$option_csv" == "1" ] ; then
    mots2csv "$@"
 fi
+if [ "$option_pdf" == "1" ] ; then
+   mots2pdf "$@"
+fi
 
 postliminaire
 
-exit 0
+echo -e "\n::: Temps d'exécution : $(($SECONDS/3600)) heure(s), $(($SECONDS%3600/60)) minute(s) et $(($SECONDS%60)) seconde(s)\n " | tee -a $fichier_sortie
