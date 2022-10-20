@@ -1,2 +1,67 @@
-# mots
-le logiciel mots version 6.50 b-20221013 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de nombreuses options et sous-options. Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. 
+Présentation des fichiers de ce dépôt.
+ 
+# mots #
+Ecrit en bash le logiciel **mots** version 6.50 b-20221013 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille.
+
+
+*Aide très détaillée : **mots** --help*
+
+# locate.sh #
+Le script bash **locate.sh** version 3.00 b-20221019 est une sur-couche de la commande 'locate'  permettant de retouver des fichiers ou répertoires dont la liste figure dans la base de données 'mlocate.db' générée par 'updatedb'. Il donne la liste de fichiers et de répertoires répondant à la recherche, avec leurs meta données (permissions, propriétaire, taille, date). Les dates des fichiers trouvés sont paramétrables et peuvent être les dates de :
+
+* dernière modification (defaut)
+* dernier accès
+* dernier changement des attributs
+* création
+
+*Aide détaillée : **locate.sh** --help*
+
+# find.sh # 
+Egalement en bash, le script **find.sh** version 1.00 b-20221019 est aussi une sur-couche de la commande 'find' permettant de retouver des fichiers ou répertoires à partir de leurs dates, de partie ou totalité de leur nom ou de leur contenu. Simplifiant la commande système, le choix des fichiers recherchés repose sur la réponse interactive aux questions suivantes :
+
+* date de début des fichiers recherchés
+* date de fin des fichiers recherchés
+* répertoire de recherche
+* profondeur de la recherche à partir de ce répertoire
+* nom ou partie du nom des fichers et répertoires recherchés
+* présence d'un texte donné dans les fichiers trouvés
+
+Le résultat distingue les fichiers, les répertoires et les fichiers contenant le texte recherché. 
+Le type des dates des fichiers et répertoires tant recherchés que trouvés est paramétrable : 
+ 
+| Type de date           |  Recherche  |  Résultats  | 
+| :--------------------- | :---------: | :---------: |
+| dernière modification  | oui         | oui         |
+| dernier accès          | oui         | oui         |
+| dern. modif. attrib.   | oui         | oui         |
+| création               | non         | oui         |
+
+Le résultat écran peur être envoyé dans un fichier.
+
+*Aide détaillée : **find.sh** --help*
+
+# financial #
+Le script financial version 1.00 b-20220725, en python, calcule les montants des remboursements périodiques d'un prêt et publie le tableau d'amortissement périodique. Il se présente sous deux versions : la version complète prend en compte l'inflation estimée et calcule les montants actualisés des payments périodiques (intéret et capital) et des restes dûs ; elle calcule ensuite le coût total effectif de l'opération ; elle permet enfin d'envoyer les résultas dans un fichier. La version simplifiée se rapproche d'une calculette.
+
+*Aide détaillée : **financial** --help*
+
+# litteral #
+
+Ecrit en bash, le script **litteral** version 1.00 b-20220512 transcrit en lettres les nombres saisis en chiffres, en "français de France" actuel, dans le respect des règles énoncées ci-dessous. le résultat est donné en échelle latine longue avec alternance -ion -iard.
+
+#### Règles orthographiques ####
+
+       Les adjectifs numéraux cardinaux strictement inférieurs à cent sont reliés
+       par un trait d'union, sauf quand ils sont reliés par "et" ; "mille" est
+       toujours invariable ; "vingt" et "cent" ne prennent le pluriel que lorsqu'ils
+       terminent l'adjectif numéral cardinal ; "un" est omis devant "cent" et
+       "mille". La réforme de 1990 n'est pas appliquée.
+
+*Aide détaillée : **litteral** --help*
+
+# triangle #
+
+Just for fun, joli triangle de Pascal
+
+
+

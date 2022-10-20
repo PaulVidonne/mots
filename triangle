@@ -1,0 +1,59 @@
+#!/usr/bin/python
+
+import datetime
+import sys
+import shutil
+import os
+from functools import partial
+from math import *
+from random import *
+from time import *
+
+
+nom=(datetime.datetime.today().strftime('%H%M%S'))
+today=datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+nom="tmp"+nom
+file=(sys.argv[0])
+file2=(os.path.basename(__file__))
+# shutil.copyfile(file, nom)
+# os.chmod(nom, 0o755)
+
+version="1.00 b-20221020"
+
+if "--version" in str(sys.argv) :
+   print("\n:::",file2," version : ",version,"\n")
+   quit()
+
+if "--help" in str(sys.argv) :
+   print("\n::: Pas d'aide pour",file2,"\n")
+   quit()
+
+print()
+liste=[]
+
+pascal=[[1]] # tableau final
+lp=[1]       # liste des degrés
+degrés=int(input("::: Nombre de degrés ? "))
+if degrés > 26 :
+    print("\n::: Degré trop élévé, le résultat serait illisible. Abandon\n")
+    quit()
+print("\n::: Triangle de Pascal de degré",degrés,": \n")
+for j in range(degrés) :
+    virg=(len(lp) -1) # nombre de virgules
+    lq=str(lp)
+    lr=floor((len(lq) - virg -2)/2)  # lr est la demi longueur de la ligne j
+    liste=liste + [lr]
+    nl=lp+[1]
+    for i in range(0,len(lp) -1) :
+        nl[i + 1] = lp[i] + lp[i +1]
+    lp = nl
+    pascal=pascal+[lp]
+for i in range(degrés) :
+    print(i," "*(liste[degrés-1] - liste[i]), end=" ")
+    for j in range(i+1) :
+        print(pascal[i][j],end=" ")
+    print()
+
+
+print()
+quit()

@@ -1,0 +1,234 @@
+#! /bin/python
+import datetime
+import sys
+import shutil
+import os
+from functools import partial
+
+nom=(datetime.datetime.today().strftime('%H%M%S'))
+today=datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+nom="tmp"+nom
+file=(sys.argv[0])
+file2=(os.path.basename(__file__))
+# pour debug
+shutil.copyfile(file, nom)
+
+version="1.00 b-20220725"
+
+if "--version" in str(sys.argv) :
+   print("\n:::",file2," version : ",version,"\n")
+   quit()
+
+if "--help" in str(sys.argv) :
+   print("\nPRESENTATION GENERALE \n\n"
+         "   Usage     financial [--help | --version] [OPTIONS] \n\n"
+         "   Objet     le script", file2, "version", version, "calcule les montants des remboursements périodiques\n"
+         "             d'un prêt et publie le tableau d'amortissement périodique. Il se présente sous deux versions :\n"
+         "             la version complète prend en compte l'inflation estimée et calcule les montants actualisés des\n"
+         "             payments périodiques (intéret et capital) et des restes dûs ; elle calcule ensuite le coût\n"
+         "             total effectif de l'opération ; elle permet enfin d'envoyer les résultas dans un fichier. La\n"
+         "             version simplifiée se rapproche d'une calculette.\n\n"
+         "DEFINITIONS \n\n"
+         "   Present Value \n"
+         "             montant du prêt (par ex. accordé par une banque). \n\n"
+         "   Nombre de périodes \n"
+         "             nombre de périodes de remboursement. Les durées de ces périodes sont égales. En version\n"
+         "             simplifiée elles peuvent être quelconques, sous réserve que les taux d'intérêt périodiques\n"
+         "             correspondent. En version complète les durées vont de l'année à la semaine, définies en\n"
+         "             réponse à la question 'nature de la période'.\n\n"
+         "   Nature de la période\n"
+         "             par convention : semaine=52, mois=12, trim=4, semestres=2, année=1 \n\n"
+         "   Taux d'intérêt périodique \n"
+         "             taux d'intérêt par période. Il n'y a pas de cumul périodique des intérêts. S'exprime en\n"
+         "             nombres décimaux en version simplifiée et en pourcentages annuel en version complète.\n\n"
+         "   Future value \n"
+         "             montant éventuel à payer au préteur à l'échéance du prêt. Par défaut zéro. Le taux d'intérêt\n"
+         "             est identique à celui du prêt remboursé par PMT. En version complète seulement.\n\n"
+         "   Taux d'inflation annuel estimé \n"
+         "             en version complète seulement.\n\n"
+         "   Affichage échéancier (O/N) \n"
+         "             affiche, pour chaque période, le montant de PMT versé, sa partie intérêt, sa partie\n"
+         "             remboursement du capital et le montant du capital restant dû. En version complète\n"
+         "             affiche les mêmes données actualisées du taux de l'inflation. Affiche également le coût\n"
+         "             total actualisé du prêt.\n\n"
+         "   PMT \n"
+         "             abréviation de 'Payment'. Montant à rembourser à chaque période. Les remboursements\n"
+         "             sont supposés payés en fin de période. \n\n"
+         "OPTIONS \n\n"
+         "   -s        version simplifiée.\n\n"
+         "   -p        le résultat est envoyé dans un fichier intitulé 'financial.txt' avec vidage de ce fichier \n"
+         "             s'il existe déjà.\n\n"
+         "   -q        le résultat est ajouté à un fichier intitulé 'financial.txt' \n\n"
+         "   +l        impression de toutes les lignes de l'échéancier. Par défaut ne sont imprimées que les 4 \n"
+         "             premières et 4 dernières lignes. Option réservée à la version complète. \n\n"
+         "DIVERS\n\n"
+         "   exécutabilité\n"
+         "            ce script a été réalisé sous GNU bash, version 5.1.8(1)-release-(x86_64-redhat-linux-gnu)\n"
+         "            en Python 3.10.7. Il ne suppose l'installation d'aucun module particulier.\n\n"
+         "  bugs   merci de signaler bugs et suggestions à : paul at vidonne point fr.\n\n"
+         "  licence\n"
+         "            Copyright (c) 2022 Paul Vidonne. Ce script peut être librement exécuté,\n"
+         "            diffusé et modifié dans les conditions de la 'Creative Commons Attribution-\n"
+         "            NonCommercial-ShareAlike 3.0 Unported License' (CC-BY-NC-SA) publiée par Creative\n"
+         "            Commons. Il est mis à disposition tel quel, SANS AUCUNE GARANTIE de quelque\n"
+         "            nature que ce soit et auprès de qui que ce soit. Plus d'informations (en anglais)\n"
+         "            sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>, texte\n"
+         "            intégral à  <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.\n"
+         "\nfinancial                                   ",version,"                                    ---\n")
+   quit()
+
+if "-p" in str(sys.argv) and not "-s" in str(sys.argv) :
+   if os.path.exists('financial.txt') :
+      os.remove('financial.txt')
+
+if "-p" in str(sys.argv) or "-q" in str(sys.argv) :
+   def my_print(file_save, *args, **kwargs) :
+       with open(file_save, "a") as f_obj:
+           print(*args, **kwargs, file=f_obj)
+       print(*args, **kwargs)
+   #partial pour curryfier la fonction
+   my_print = partial(my_print, "financial.txt")
+else :
+   def my_print(*args) :
+       print(*args)
+print()
+
+def print_lines() :
+   my_print('%7s' % m, '%12s' % f"{pmt2:.2f}", '%12s' % f"{int:.2f}", '%12s' % f"{remb:.2f}", '%15s' % f"{reste_n:.2f}", '%12s' % f"{pmt2/(1+tif)**(m+1):.2f}",\
+            '%12s' % f"{int/(1+tif)**(m+1):.2f}", '%12s' % f"{remb/(1+tif)**(m+1):.2f}", '%15s' % f"{reste_n/(1+tif)**(m+1):.2f}")
+
+pv=input("::: Present Value : ")
+if not pv:
+   pv=0
+pv=float(pv)
+
+if not "-s" in str(sys.argv) :
+   nb_period_s=0
+   lit_period={"1" : "annuel", "2" : "semestriel", "4" : "trimestriel", "12" : "mensuel", "52" : "hebdomadaire"}
+   while not nb_period_s  in ["1", "2", "4", "12", "52"] :
+      nb_period_s=(input("::: Nature de la période : semaine=52, mois=12, trim=4, semestres=2, année=1 : "))
+   nb_period=float(int(nb_period_s))
+
+n=input("::: Nombre de périodes : ")
+if not n :
+   print("\n::: Pas de nombre de périodes indiqué. Abandon\n")
+   quit()
+n=float(n)
+if n < 1 :
+   print("\n::: Le nombre de périodes doit être au moins égal à 1. Abandon\n")
+   quit()
+if round(n,10) != round(n) :
+   print("::: Le nombre de périodes pris en compte sera :", round(n))
+
+if not "-s" in str(sys.argv) :
+   i=float(input("::: Taux d'intéret annuel en % : "))
+   if not i > 0 :
+      print("\n::: Le taux d'intérêt doit être positif. Abandon\n")
+      quit()
+   ia=i
+   i=i/(100*float(nb_period))
+   print("::: Soit un taux", lit_period[nb_period_s], "de : ", i)
+
+   fv=(input("::: Future value : "))
+   if not fv:
+      fv=0
+   fv=float(fv)
+else :
+   i=float(input("::: Taux d'intéret périodique ex. 0.001525 : "))
+   if not i > 0 :
+      print("\n::: Le taux d'intérêt doit être positif. Abandon\n")
+      quit()
+   fv=0
+
+pmt1=pv*(i*(1+i)**n)/((1+i)**n -1)
+pmt2=(pv-fv)*(i*(1+i)**n)/((1+i)**n -1)+i*fv
+
+# version standard
+if not "-s" in str(sys.argv) :
+   print("::: PMT avec FV de", f"{fv:.0f}",": ", f"{pmt2:.2f}")
+
+print("::: PMT sans FV : ", f"{pmt1:.2f}")
+
+if not "-s" in str(sys.argv) :
+   tif=(input("::: Taux d'inflation annuel estimé en % : "))
+   if not tif :
+      print("::: Le taux d'inflation est supposé nul")
+      tif=0
+   tif=float(tif)
+   tif=tif/100
+   tif=tif/nb_period
+
+   if "-p" in str(sys.argv) or "-q" in str(sys.argv) :
+      msg="\n::: ===========================================================" + \
+          "\n::: " + str(file2) + " -- version " + str(version) + " -- le " + str(today) + \
+          "\n::: Present Value : " + str(f"{pv:.0f}") + \
+          "\n::: Nature de la période : " + lit_period[nb_period_s] + \
+          "\n::: Nombre de périodes : " + str(f"{n:.0f}") + \
+          "\n::: Taux d'intérêt annuel : " + str(ia) +" %" + \
+          "\n::: Soit un taux " + lit_period[nb_period_s] + " de : " + str(i) + \
+          "\n::: Future value : " + str(f"{fv:.0f}") + \
+          "\n::: PMT sans FV : " + str(f"{pmt1:.2f}") + \
+          "\n::: PMT avec FV de " + str(f"{fv:.0f}") + " : " + str(f"{pmt2:.2f}") + \
+          "\n::: Taux annuel d'inflation estimé : " + str(f"{tif*nb_period*100:.2f}") +" %" + "\n\n"
+      with open("financial.txt", "a") as sortie :
+         sortie.write(msg)
+
+   nul=(input("::: Affichage échéancier (O/N) ? "))
+   if not nul in ("o", "O", "y", "Y", "0") :
+      print()
+      quit()
+   m=int(0)
+
+   my_print('%7s' % "\nPériode", '%12s' % "PMT", '%12s' % "Intérêt", '%12s' % "Capital", '%15s' % "Reste dû", '%12s' % "PMT",\
+         '%12s' % "Intérêt", '%12s' % "Capital", '%15s' % "Reste dû")
+   my_print('%7s' % "", '%12s' % "Nominal", '%12s' % "Nominal", '%12s' % "Nominal", '%15s' % "Nominal",'%12s' % "Actualisé",\
+         '%12s' % "Actualisé", '%12s' % "Actualisé",'%15s' % "Actualisé")
+   tot_int=tot_cap=tot_pmt=reste=tot_pmt_a=tot_int_a=tot_cap_a=reste_a=0
+   n=int(n)
+
+   for m in range(n) :
+     remb=(pmt2 - i*pv)*(1 + i)**m   # erreur corrigée : **(m-1)
+     int=pmt2 - remb
+     reste_n=pv-reste-remb
+     if not "+l" in str(sys.argv) :
+        if m < 3 or m > (n - 4) :
+           print_lines()
+     else :
+        print_lines()
+     tot_int=tot_int+int
+     tot_int_a=tot_int_a+int/(1+tif)**(m+1)
+     tot_cap=tot_cap+remb
+     tot_cap_a=tot_cap_a+remb/(1+tif)**(m+1)
+     tot_pmt=tot_pmt+pmt2
+     tot_pmt_a=tot_pmt_a+pmt2/(1+tif)**(m+1)
+     reste=reste+remb
+     reste_a=reste_a+remb/(1+tif)**(m+1)
+   my_print('%7s' % "Totaux", '%12s' % f"{tot_pmt:.2f}", '%12s' % f"{tot_int:.2f}", '%12s' % f"{tot_cap:.2f}", \
+         '%28s' % f"{tot_pmt_a:.2f}", '%12s' % f"{tot_int_a:.2f}", '%12s' % f"{tot_cap_a:.2f}" )
+   my_print("\n::: Coût total (remboursement capital et interêts) de", f"{pv:.0f}", "actualisé au taux annuel de ", f"{tif*nb_period*100:.2f}", "% =", f"{tot_pmt_a+reste_n/(1+tif)**(m+1):.2f}\n")
+
+   if "-p" in str(sys.argv) or "-q" in str(sys.argv) :
+      my_print("::: Les résultats ci-dessus figurent dans le fichier : financial.txt\n")
+
+# version simpliflée
+if "-s" in str(sys.argv) :
+   n=int(n)
+   tot_int=tot_cap=tot_pmt=reste=0
+   nul=(input("::: Affichage échéancier (O/N) ? "))
+   if not nul in ("o", "O", "y", "Y", "0") :
+      print()
+      quit()
+   print('%7s' % "\nPériode", '%15s' % "PMT", '%15s' % "Intérêt", '%15s' % "Capital", '%15s' % "Reste dû")
+   for m in range(n) :
+     remb=(pmt1 - i*pv)*(1 + i)**m
+     int=pmt1 - remb
+     reste_n=pv-reste-remb
+     print('%7s' % m, '%15s' % f"{pmt1:.2f}", '%15s' % f"{int:.2f}", '%15s' % f"{remb:.2f}", '%15s' % f"{reste_n:.2f}"  )
+     tot_int=tot_int+int
+     tot_cap=tot_cap+remb
+     tot_pmt=tot_pmt+pmt1
+     reste=reste+remb
+   print('%7s' % "Totaux", '%15s' % f"{tot_pmt:.2f}", '%15s' % f"{tot_int:.2f}", '%15s' % f"{tot_cap:.2f}")
+
+print()
+quit()
