@@ -4,7 +4,7 @@ file="tmp$(date +%H%M%S)"
 # cp "$0" "$file"
 # date
 
-version="1.00 b-20220512"
+version="1.10 b-20221021"
 
 if [[ $@ == *--help* ]] ; then
 echo
@@ -141,8 +141,10 @@ fi
 if [[ $@ == *-u* ]] ; then
    read -p "::: Nom de l'unité  : " unit
    units=$unit"s"
+   echo -e "::: Nom de l'unité : $unit" >>$sortie_fichier
    read -p "::: Nom du centième : " centieme
    centiemes=$centieme"s"
+   echo -e "::: Nom du centième : $centieme" >>$sortie_fichier
 else
    unit="no_unit"
    units="no_units"

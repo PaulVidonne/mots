@@ -11,9 +11,9 @@ nom="tmp"+nom
 file=(sys.argv[0])
 file2=(os.path.basename(__file__))
 # pour debug
-shutil.copyfile(file, nom)
+# shutil.copyfile(file, nom)
 
-version="1.00 b-20220725"
+version="1.01 b-20221021"
 
 if "--version" in str(sys.argv) :
    print("\n:::",file2," version : ",version,"\n")
@@ -22,12 +22,12 @@ if "--version" in str(sys.argv) :
 if "--help" in str(sys.argv) :
    print("\nPRESENTATION GENERALE \n\n"
          "   Usage     financial [--help | --version] [OPTIONS] \n\n"
-         "   Objet     le script", file2, "version", version, "calcule les montants des remboursements périodiques\n"
-         "             d'un prêt et publie le tableau d'amortissement périodique. Il se présente sous deux versions :\n"
-         "             la version complète prend en compte l'inflation estimée et calcule les montants actualisés des\n"
-         "             payments périodiques (intéret et capital) et des restes dûs ; elle calcule ensuite le coût\n"
-         "             total effectif de l'opération ; elle permet enfin d'envoyer les résultas dans un fichier. La\n"
-         "             version simplifiée se rapproche d'une calculette.\n\n"
+         "   Objet     le script", file2, "version", version, "calcule les montants des remboursements\n"
+         "             périodique d'un prêt et publie le tableau d'amortissement. Il se présente sous deux\n"
+         "             versions : la version complète prend en compte l'inflation estimée et calcule les montants\n"
+         "             actualisés des payments périodiques (intéret et capital) et des restes dûs ; elle calcule\n"
+         "             ensuite le coût total effectif de l'opération ; elle permet enfin d'envoyer les résultats\n"
+         "             dans un fichier. La  version simplifiée se rapproche d'une calculette.\n\n"
          "DEFINITIONS \n\n"
          "   Present Value \n"
          "             montant du prêt (par ex. accordé par une banque). \n\n"

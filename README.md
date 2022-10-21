@@ -1,7 +1,7 @@
 Présentation des fichiers de ce dépôt.
  
 # mots #
-Ecrit en bash le logiciel **mots** version 6.50 b-20221013 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille.
+Ecrit en bash le logiciel **mots** version 6.51 b-20221021 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille.
 
 
 *Aide très détaillée : **mots** --help*
@@ -41,13 +41,13 @@ Le résultat écran peur être envoyé dans un fichier.
 *Aide détaillée : **find.sh** --help*
 
 # financial #
-Le script financial version 1.00 b-20220725, en python, calcule les montants des remboursements périodiques d'un prêt et publie le tableau d'amortissement périodique. Il se présente sous deux versions : la version complète prend en compte l'inflation estimée et calcule les montants actualisés des payments périodiques (intéret et capital) et des restes dûs ; elle calcule ensuite le coût total effectif de l'opération ; elle permet enfin d'envoyer les résultas dans un fichier. La version simplifiée se rapproche d'une calculette.
+Le script financial version 1.01 b-20221021, en python, calcule les montants des remboursements périodiques d'un prêt et publie le tableau d'amortissement périodique. Il se présente sous deux versions : la version complète prend en compte l'inflation estimée et calcule les montants actualisés des payments périodiques (intéret et capital) et des restes dûs ; elle calcule ensuite le coût total effectif de l'opération ; elle permet enfin d'envoyer les résultas dans un fichier. La version simplifiée se rapproche d'une calculette.
 
 *Aide détaillée : **financial** --help*
 
 # litteral #
 
-Ecrit en bash, le script **litteral** version 1.00 b-20220512 transcrit en lettres les nombres saisis en chiffres, en "français de France" actuel, dans le respect des règles énoncées ci-dessous. le résultat est donné en échelle latine longue avec alternance -ion -iard.
+Ecrit en bash, le script **litteral** version 1.10 b-20221021 transcrit en lettres les nombres saisis en chiffres, en "français de France" actuel, dans le respect des règles énoncées ci-dessous. le résultat est donné en échelle latine longue avec alternance -ion -iard.
 
 #### Règles orthographiques ####
 

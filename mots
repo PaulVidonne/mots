@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="6.50 b-20221013"
+version="6.51 b-20221021"
 
 # pour debug
 # set -x
@@ -549,7 +549,9 @@ else
       fi
    fi
    objet=$(sed -E 's/(^|( )+)-[a-zA-Z0-9=\"-\"\._]+//g' <<< $* | xargs)
-   ligne_commande=$(sed -E "s/$objet//g" <<< $ligne_commande)
+   if ! [ -z $objet ] ; then
+      ligne_commande=$(sed -E "s/$objet//g" <<< $ligne_commande)
+  fi
 fi
 #------------------------------------analyse de la ligne de commande-----------------------
 # set -f incertain, donc if -24 destiné a contrer la présence d'une * comme seul argument
@@ -781,9 +783,9 @@ if [ $type_entree == directe ]; then # on teste le fichier a analyser
       echo -e "::: Le fichier '$objet' est vide. Abandon\n"
       exit
    fi
-   sha1=$(sha1sum "$objet" | cut -c 1-40)
-   echo -e "::: Analyse fichier : $objet " | tee -a $fichier_sortie
-   echo -e "::: Empreinte SHA-1 : $sha1" | tee -a $fichier_sortie
+   echo -e "::: Analyse fichier : $objet" | tee -a $fichier_sortie
+   echo -e "::: Daté : "$(stat -c %y "$objet" | cut -c 1-19) | tee -a $fichier_sortie
+   echo -e "::: Empreinte SHA-1 :" $(sha1sum "$objet" | cut -c 1-40) | tee -a $fichier_sortie
    if [ "$char_set" == "" ] ; then
       char_set=$(file -i "$objet" | sed -e "s/.*charset=//")
    fi
