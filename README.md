@@ -41,7 +41,7 @@ Le résultat écran peur être envoyé dans un fichier.
 *Aide détaillée : **find.sh** --help*
 
 # financial #
-Le script financial version 1.01 b-20221021, en python, calcule les montants des remboursements périodiques d'un prêt et publie le tableau d'amortissement périodique. Il se présente sous deux versions : la version complète prend en compte l'inflation estimée et calcule les montants actualisés des payments périodiques (intéret et capital) et des restes dûs ; elle calcule ensuite le coût total effectif de l'opération ; elle permet enfin d'envoyer les résultas dans un fichier. La version simplifiée se rapproche d'une calculette.
+Le script **financial** version 1.01 b-20221021, en python, calcule les montants des remboursements périodiques d'un prêt et publie le tableau d'amortissement périodique. Il se présente sous deux versions : la version complète prend en compte l'inflation estimée et calcule les montants actualisés des payments périodiques (intéret et capital) et des restes dûs ; elle calcule ensuite le coût total effectif de l'opération ; elle permet enfin d'envoyer les résultas dans un fichier. La version simplifiée se rapproche d'une calculette.
 
 *Aide détaillée : **financial** --help*
 
@@ -58,6 +58,12 @@ Ecrit en bash, le script **litteral** version 1.10 b-20221021 transcrit en lettr
        "mille". La réforme de 1990 n'est pas appliquée.
 
 *Aide détaillée : **litteral** --help*
+
+# dow #
+
+le script bash **dow** version 1.00 b-20221106 établit la correspondance entre les dates du calendrier grégorien, celles du calendrier julien et celles de leurs numéros en "jours juliens" inventés par Joseph Juste Scaliger. La saisie de l'une de ces trois données affiche les deux autres ainsi que le jour de la semaine.
+
+*Aide détaillée : **dow** --help*
 
 # triangle #
 
