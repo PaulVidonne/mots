@@ -9,7 +9,7 @@ file="tmp$(date +%m%d-%H%M%S)"
 # cal --reforn=julian est entièrement julien
 # cal --reform=gregorian est entièrement grégorien
 
-version="1.00 b-20221106"
+version="1.01 b-20221110"
 
 usage()
 {
@@ -36,10 +36,9 @@ PRESENTATION GENERALE
 
 SYNTAXE
           les dates calendaires peuvent être saisies sous la forme 'JJ-MM-AAAA' ou
-          'JJ/MM/AAA' et les numéros de jours juliens "XXXXXXXXX" avec ou sans sans espace.
+          'JJ/MM/AAA' et les numéros de jours juliens "XXXXXXXXX" avec ou sans sans espaces.
           Les années antérieures à l'an 1 sont désignées par le signe "-" après l'année, de
           type : 'JJ/MM/AAAA-'.
-
 
 OPTIONS
 
@@ -47,7 +46,6 @@ OPTIONS
           saisie est une date du calendrier grégorien.
 
   -en     les résultats sont affichés en anglais
-
 
 DIVERS
 
@@ -57,12 +55,12 @@ DIVERS
 
           Les années sont des années entières qui commencent à 12 heures.
 
-          Les calendriers sont proleptiques. On considère que l'année  antérieure à l'an 1
+          Les calendriers sont proleptiques. On considère que l'année antérieure à l'an 1
           est l'année '0' et non l'année '-1'. Ainsi la date de l'assassinat de Jules César
           en 44 av. J.-C. doit être ici saisie '15/03/0043-'.
 
           Le script accepte tout jour julien compris entre 0 et 5 373 557 et toute date
-          comprise entre l'an 4713 av. J.-C. et l'an 9999 apr. J.C.
+          comprise entre l'an 4712 av. J.-C. et l'an 9999 apr. J.C.
 
    exécutabilité
           ce script a été réalisé sous GNU bash, version 5.1.8(1)-release-(x86_64-redhat-
@@ -122,10 +120,10 @@ else
    y=${jour:6:4}
    m=${jour:3:2}
    d=${jour:0:2}
-   if [[ $jour == *-* ]] ; then
-      if [[ $y -gt 4713 ]] ; then
+   if [[ $jour =~ ^.*[0-9]{4}[-]{1}$ ]] ; then
+      if [[ $y -gt 4712 ]] ; then
          usage
-         echo -e "::: L'année '$y-' ne peut être antérieure à 4713 av. J.-C. Abandon\n"
+         echo -e "::: L'année '$y-' n'est pas admise car antérieure à 4712 av. J.-C. Abandon\n"
          exit
       fi
       y=-$y
@@ -147,7 +145,7 @@ if [ ${d:0:1} == 0 ] ; then
 else
    dd=$d
 fi
-if [ $y -gt -1 ] ; then
+if [ $y -gt 0 ] ; then
    cal --reform=julian $m $y 2>/dev/null | grep -E -e "(^| )$dd" 1>/dev/null
    if ! [[ $? == 0 ]] ; then
       usage
@@ -159,7 +157,7 @@ else
         usage
         echo -e "::: Numéro du jour '$d' ou du mois '$m' impossible. Abandon\n"
         exit
-     elif ([ $d -gt 28 ] && [ $m -eq 2 ]) || ([ $m -eq 2 ] && [ $d -eq 29 ] && [ $(($y%2)) -ne 0 ]); then
+     elif ([ $d -gt 29 ] && [ $m -eq 2 ]) || ([ $m -eq 2 ] && [ $d -eq 29 ] && [ $(($y%4)) -ne 0 ]); then
         usage
         echo -e "::: La date '$jour' ne figure pas au calendrier julien proleptique. Abandon\n"
         exit
@@ -177,8 +175,12 @@ function gdtojdn()
 {
    if ! ( [[ $(date -d "${jour:6:4}-${jour:3:2}-${jour:0:2}" >/dev/null 2>&1 ; echo $?) == 0 ]] ) ; then
       usage
-      echo -e "::: La date '$jour' ne figure pas au calendrier gregorien. Abandon\n"
-      exit
+      if [ $y -gt 1582 ]; then
+         echo -e "::: La date '$jour' ne figure pas au calendrier grégorien. Abandon\n"
+      else
+         echo -e "::: La date '$jour' ne figure pas au calendrier grégorien proleptique. Abandon\n"
+      fi
+   exit
    fi
 
 a=$(echo "(1461 * ($y + 4800 + ($m - 14)/12 )/4)" | bc )
