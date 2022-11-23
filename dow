@@ -9,7 +9,7 @@ file="tmp$(date +%m%d-%H%M%S)"
 # cal --reforn=julian est entièrement julien
 # cal --reform=gregorian est entièrement grégorien
 
-version="1.01 b-20221110"
+version="1.01 b-20221120"
 
 usage()
 {
@@ -35,10 +35,10 @@ PRESENTATION GENERALE
           données affiche les deux autres ainsi que le jour de la semaine.
 
 SYNTAXE
-          les dates calendaires peuvent être saisies sous la forme 'JJ-MM-AAAA' ou
-          'JJ/MM/AAA' et les numéros de jours juliens "XXXXXXXXX" avec ou sans sans espaces.
-          Les années antérieures à l'an 1 sont désignées par le signe "-" après l'année, de
-          type : 'JJ/MM/AAAA-'.
+          les dates calendaires peuvent être saisies sous la forme 'JJ-MM-AAAA' ou 'JJ/MM/AAA'
+          et les numéros de jours juliens "XXXXXXXXX" avec ou sans espaces. Les années
+          antérieures à l'an 1 sont désignées par le signe "-" après l'année, de type :
+          'JJ/MM/AAAA-'.
 
 OPTIONS
 
@@ -111,7 +111,7 @@ else
       exit
    fi
    # on teste la validité de la forme date
-   jour=$(sed -E 's/ -j| -en//g' <<< $@ )
+   jour=$(sed -E 's/ *-(j|en) *//g' <<< $@ )
    if ! ( [[ $jour =~ ^[0-9]{2}[/-][0-9]{2}[/-][0-9]{4}[-]?$ ]] ) ; then
       usage
       echo -e "::: Date '$jour' invalide. Le format de date est 'JJ-MM-AAAA[-]'. Abandon\n"
@@ -261,3 +261,4 @@ fi
 
 entree $@
 sortie $@
+

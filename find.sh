@@ -4,7 +4,7 @@
 # cp "$0" "$file"
 # date
 
-version="1.00 b-20221019"
+version="1.01 b-20221120"
 
 if [[ $@ == *--help* ]] ; then
 echo
@@ -121,7 +121,8 @@ if [ -z "$debut" ] ; then
     debut="1970-01-01"
 fi
 
-if ! ( [[ $debut =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}( [0-9]{2}:[0-9]{2}){0,1}$ ]] && [[ $(date -d "$debut" >/dev/null 2>&1 ; echo $?) == 0 ]] ) ; then
+if ! ( [[ $debut =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}( [0-9]{2}:[0-9]{2}){0,1}$ ]] && \
+       [[ $(date -d "$debut" >/dev/null 2>&1 ; echo $?) == 0 ]] ) ; then
    echo -e "\n::: Date '$debut' invalide. Abandon\n"
    exit
 fi
@@ -130,7 +131,8 @@ read -p "::: Date fin recherche, format YYYY-MM-JJ [HH:MM] : " fin
 if [ -z "$fin" ] ; then
     fin="2999-12-31"
 fi
-if ! ( [[ $fin =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}( [0-9]{2}:[0-9]{2}){0,1}$ ]] && [[ $(date -d "$fin" >/dev/null 2>&1 ; echo $?) == 0 ]] ) ; then
+if ! ( [[ $fin =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}( [0-9]{2}:[0-9]{2}){0,1}$ ]] && \
+       [[ $(date -d "$fin" >/dev/null 2>&1 ; echo $?) == 0 ]] ) ; then
    echo -e "\n::: Date '$fin' invalide. Abandon\n"
    exit
 fi
@@ -176,29 +178,35 @@ else
    if [[ $@ == *-p* ]] ; then
       $(> find.txt)
    fi
-   echo -e "\n:::==============================================================================" >> $fichier_sortie
+   echo -e "\n:::=======================================================================" >> $fichier_sortie
    echo -e "::: Script : $(basename $0) -- Date : $(date) -- Commande ($@)" >> $fichier_sortie
 fi
 
-echo -e "\n::: FICHIERS : Commande : '$(basename $0) $@' ; Racine : '$racine' ; Profondeur : $rep ; Début : '$debut' ; Fin : '$fin' " | tee -a $fichier_sortie
-echo -e "::: Temps des limites : $limites ; Nom recherché : '$nom' ; Temps des résultats : $temps_result" | tee -a $fichier_sortie
+echo -e "\n::: FICHIERS : Commande : '$(basename $0) $@' ; Racine : '$racine' ; Profondeur : $rep ; Début : '$debut' ; Fin : '$fin' " \
+        | tee -a $fichier_sortie
+echo -e "::: Temps des limites : $limites ; Nom recherché : '$nom' ; Temps des résultats : $temps_result" | \
+        tee -a $fichier_sortie
 find "$racine" $maxdepth $test "$debut"  -not $test "$fin"  -type f -iname "$nom" -print0  | xargs -0 -r ls -ltr $temps \
-| tee /dev/tty | tee -a $fichier_sortie | wc -l | xargs echo "::: Nombre de fichiers(s) :" | tee -a $fichier_sortie
+        | tee /dev/tty | tee -a $fichier_sortie | wc -l | xargs echo "::: Nombre de fichiers(s) :" | tee -a $fichier_sortie
 
-echo -e "\n::: REPERTOIRES : Commande : '$(basename $0) $@' ; Racine : '$racine' ; Profondeur : $rep ; Début : '$debut' ; Fin : '$fin' " | tee -a $fichier_sortie
-echo -e "::: Temps des limites : $limites ; Nom recherché : '$nom' ; Temps des résultats : $temps_result" | tee -a $fichier_sortie
+echo -e "\n::: REPERTOIRES : Commande : '$(basename $0) $@' ; Racine : '$racine' ; Profondeur : $rep ; Début : '$debut' ; Fin : '$fin' " \
+        | tee -a $fichier_sortie
+echo -e "::: Temps des limites : $limites ; Nom recherché : '$nom' ; Temps des résultats : $temps_result" | \
+        tee -a $fichier_sortie
 find "$racine" $maxdepth $test "$debut"  -not $test "$fin"  -type d -iname "$nom" -print0  | xargs -0 -r ls -dltr $temps \
-| tee /dev/tty | tee -a $fichier_sortie | wc -l | xargs echo "::: Nombre de répertoires(s) :" | tee -a $fichier_sortie
+        | tee /dev/tty | tee -a $fichier_sortie | wc -l | xargs echo "::: Nombre de répertoires(s) :" | tee -a $fichier_sortie
 
 if ! [ -z "$contenu" ] ; then
    echo -e "\n::: FICHIERS qui, de plus, contiennent '$contenu' (fichier:ligne numéro:ligne)" | tee -a $fichier_sortie
-   find "$racine" $maxdepth $test "$debut"  -not $test "$fin"  -type f -iname "$nom" -print0  | xargs -0 grep -H -n -i "$contenu" 2>&1 \
-   | sed 's/grep: //' | tee /dev/tty | tee -a $fichier_sortie | wc -l | xargs echo "::: Nombre d'occurence(s) :" | tee -a $fichier_sortie
+   find "$racine" $maxdepth $test "$debut"  -not $test "$fin"  -type f -iname "$nom" -print0  | xargs -0 grep -H -n -i \
+        "$contenu" 2>&1 | sed 's/grep: //' | tee /dev/tty | tee -a $fichier_sortie | wc -l | xargs echo "::: Nombre d'occurence(s) :" \
+        | tee -a $fichier_sortie
 fi
 
 if [[ $@ == *-p* || $@ == *-q* ]] ; then
    echo -e "\n::: Les résultats ci-dessus figurent dans le fichier : $(pwd)/find.txt" | tee -a $fichier_sortie
 fi
 
-echo -e "\n::: Temps d'exécution : $(($SECONDS/3600)) heure(s), $(($SECONDS%3600/60)) minute(s) et $(($SECONDS%60)) seconde(s)\n" | tee -a $fichier_sortie
+echo -e "\n::: Temps d'exécution : $(($SECONDS/3600)) heure(s), $(($SECONDS%3600/60)) minute(s) et $(($SECONDS%60)) \
+seconde(s)\n" | tee -a $fichier_sortie
 
