@@ -4,7 +4,7 @@
 # cp "$0" "$file"
 # date
 
-version="1.01 b-20221120"
+version="1.02 b-20221126"
 
 if [[ $@ == *--help* ]] ; then
 echo
@@ -16,13 +16,6 @@ PRESENTATION GENERALE
    Objet  le script $(basename $0) version $version est une sur-couche de la commande 'find'
           permettant de retouver des fichiers ou répertoires à partir de leurs dates, de
           partie ou totalité de leur nom ou de leur contenu.
-
-   Rappel
-          les dates de fichiers sous linux sont les suivants (cmd stat)
-              Accès  : atime  : dernier accès, peu fiable
-              Modif. : mtime  : modification du contenu
-              Changt : ctime  : changement des attributs
-              Créé   : crtime : création du fichier, pas tjs documenté
 
    Recherches
           Le motif de recherche (fichier, répertoire) est traité sans égard pour la casse.
@@ -39,6 +32,16 @@ PRESENTATION GENERALE
    Restitutions
           les dates des fichiers et répertoires trouvés peuvent être donnés en  dates
           Accès, Modif., Changt, Créé.
+
+   Rappels
+          les dates de fichiers sous linux sont les suivants (cmd stat)
+              Accès  : atime  : dernier accès, peu fiable
+              Modif. : mtime  : modification du contenu
+              Changt : ctime  : changement des attributs
+              Créé   : crtime : création du fichier, pas tjs documenté
+
+          les noms de fichiers ne peuvent contenir les caractères '\ / " < < $' et ne
+          peuvent être précédés du signe '-'.
 
 OPTIONS
 
@@ -167,6 +170,12 @@ fi
 read -p "::: Nom du ou des fichiers recherchés (jokers possibles) : " nom
 if [ -z "$nom" ] ; then
    nom="*"
+fi
+
+re=^[-]\|[\/\"\<\>$]
+if [[ "${nom}" =~ $re ]] ; then
+   echo -e "\n::: Présence de caractère(s) dans '$nom' non autorisé(s) dans un nom de fichier. Abandon\n"
+   exit
 fi
 
 read -p "::: Texte présent dans le ou les fichiers : " contenu
