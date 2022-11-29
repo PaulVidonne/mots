@@ -69,6 +69,8 @@ Le script bash **dow** version 1.01 b-20221110 établit la correspondance entre 
 
  Le script **clean** version 3.00 b-20221129 recherche les fichiers et répertoires contenant un  motif indiqué, les dénombre et les élimine si confirmation.
 
+*Aide : **clean** --help*
+
 # triangle #
 
 Just for fun, joli triangle de Pascal

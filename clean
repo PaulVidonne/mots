@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#file="tmp$(date +%m%d-%H%M%S)"
+# file="tmp$(date +%m%d-%H%M%S)"
 # cp "$0" "$file"
 # date
 
@@ -32,10 +32,29 @@ OPTIONS
 
 DIVERS
 
+   Rappel
+           les noms de fichiers et répertoires ne peuvent contenir les caractères '\ / " < > $'
+           et ne peuvent être précédés du signe '-'.
+
    Mise en garde
            en cas de confirmation de la suppression de la liste des fichiers ou des répertoires
            à éliminer ces derniers le seront sans confirmation individuelle. Cette suppression
            est alors définitive.
+
+   Exécutabilité
+           ce script a été réalisé sous GNU bash, version 5.1.8(1)-release-(x86_64-redhat-
+           linux-gnu). Il ne suppose l'installation d'aucun module particulier.
+
+   Bugs    merci de signaler bugs et suggestions à : paul at vidonne point fr
+
+   Licence
+           Copyright (c) $(date +%Y) Paul Vidonne. Ce script peut être librement exécuté,
+           diffusé et modifié dans les conditions de la 'Creative Commons Attribution-
+           NonCommercial-ShareAlike 3.0 Unported License' (CC-BY-NC-SA) publiée par Creative
+           Commons. Il est mis à disposition "tel quel", SANS AUCUNE GARANTIE de quelque
+           nature que ce soit et auprès de qui que ce soit. Plus d'informations (en anglais)
+           sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>, texte
+           intégral à  <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
 
 $(basename $0)                      version : $version                               ---
 EOF
