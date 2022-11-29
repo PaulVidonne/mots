@@ -1,0 +1,121 @@
+#!/bin/bash
+
+#file="tmp$(date +%m%d-%H%M%S)"
+# cp "$0" "$file"
+# date
+
+version="3.00 b-20221129"
+usage()
+{
+   echo -e "::: Usage : [ $(basename $0) [--help | --version] | chemin ]"
+}
+
+if [[ $@ == *--help* ]] ; then
+echo
+cat << EOF
+PRESENTATION GENERALE
+
+   Usage  $(basename $0) [--help | --version] | OPTIONS ]
+
+   Objet   le script '$(basename $0)' recherche les fichiers et répertoires contenant le motif
+           indiqué, les dénombre et les élimine si confirmation.
+
+OPTIONS
+
+   -d=[Répertoire]
+           répertoire à partir duquel les recherches sont effectuées. Par défaut '/mnt/sdb1'.
+
+   -m=[motif]
+           motif recherché. Jokers acceptés. Par défaut '*Zone.Identifier".
+
+   -s      le motif alors est sensible à la casse. Par défaut non sensible.
+
+DIVERS
+
+   Mise en garde
+           en cas de confirmation de la suppression de la liste des fichiers ou des répertoires
+           à éliminer ces derniers le seront sans confirmation individuelle. Cette suppression
+           est alors définitive.
+
+$(basename $0)                      version : $version                               ---
+EOF
+echo
+exit
+fi
+
+if [[ $@ == *--version* ]] ; then
+   echo -e "\n::: $(basename $0) version : $version\n"
+   exit
+fi
+
+if [[ $@ == *-d=* ]] ; then
+   chemin=$(sed -E -e 's/.*d=()|\s.*/\1/g' <<<$@ )
+   if ! [ -d $chemin ] ; then
+      echo -e "\n::: Le chemin $chemin n'existe pas. Abandon"
+      usage
+      exit
+   fi
+else
+   chemin=/mnt/sdb1
+fi
+echo -e "\n::: Répertoire de recherche : "$chemin
+
+if [[ $@ == *-m=* ]] ; then
+   elimin=$(sed -E -e 's/.*m=()|\s.*/\1/g' <<<$@ )
+else
+   elimin=*Zone.Identifier
+fi
+if [[ "${elimin}" =~ ^[-]|[\/\"\<\>$] ]] ; then
+    echo -e "\n::: Présence de caractère(s) dans '$elimin' non autorisé(s) dans un nom de fichier. Abandon\n"
+    exit
+fi
+echo -e "::: Motif de recherche : "$elimin
+
+if [[ $@ == *-s* ]] ; then
+   casse=-name
+   echo -e "::: Le motif '$elimin' est sensible à la casse"
+else
+   casse=-iname
+   echo -e "::: Le motif '$elimin' est insensible à la casse"
+fi
+
+echo -e "::: Elimination des FICHIERS '$elimin' suivants à partir de '$chemin'\n"
+nb=$(find $chemin -follow -type f $casse "$elimin" -printf %M" "%Ac" "%u" "%d" "%s" octets "%p"\n" | tee /dev/tty | wc -l )
+if [ -z $nb ]; then
+   nb="0"
+fi
+if [ $nb = "0" ]; then
+   echo "::: Pas de fichier à supprimer"
+else
+   echo -e "\n::: "$nb" fichiers [$elimin] peuvent être supprimés"
+   echo -e -n "::: Peut-on supprimer ces fichiers (O/N) ? "
+   read rep
+   case "$rep" in
+      (o|O|y|Y|0) echo "::: Supression des "$nb" fichier(s) en cours"
+         find $chemin -follow -type f $casse "$elimin" -delete
+         echo "::: "$nb" fichiers(s) supprimé(s)" ;;
+      (n|N|*) echo "::: Suppression des "$nb" fichier(s) abandonnée" ;;
+   esac
+fi
+
+echo -e "\n::: Elimination des REPERTOIRES '$elimin' suivants à partir de '$chemin'\n"
+nb=$(find $chemin -follow -type d $casse "$elimin" -printf %M" "%Ac" "%u" "%d" "%s" octets "%p"\n" | tee /dev/tty | wc -l)
+if [ -z $nb ]; then
+   nb="0"
+fi
+if [ $nb = "0" ]; then
+   echo "::: Pas de répertoire à supprimer"
+else
+   echo -e "\n::: "$nb" répertoire(s) [$elimin] peuvent être supprimés"
+   echo -e -n "::: Peut-on supprimer ces répertoires (O/N) ? "
+   read rep
+   case "$rep" in
+      (o|O|y|Y|0) echo "::: Supression des "$nb" répertoires(s) en cours"
+         find $chemin -follow -type d $casse "$elimin" -exec rm -rf {} +
+         echo "::: "$nb" répertoires(s) supprimé(s)" ;;
+      (n|N|*) echo "::: Suppression des "$nb" répertoires(s) abandonnée" ;;
+   esac
+fi
+
+echo "::: Fin du programme '$(basename $0)'"
+echo

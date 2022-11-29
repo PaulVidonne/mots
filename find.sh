@@ -4,7 +4,7 @@
 # cp "$0" "$file"
 # date
 
-version="1.02 b-20221126"
+version="1.03 b-20221129"
 
 if [[ $@ == *--help* ]] ; then
 echo
@@ -40,7 +40,7 @@ PRESENTATION GENERALE
               Changt : ctime  : changement des attributs
               Créé   : crtime : création du fichier, pas tjs documenté
 
-          les noms de fichiers ne peuvent contenir les caractères '\ / " < < $' et ne
+          les noms de fichiers ne peuvent contenir les caractères '\ / " < > $' et ne
           peuvent être précédés du signe '-'.
 
 OPTIONS
@@ -172,8 +172,7 @@ if [ -z "$nom" ] ; then
    nom="*"
 fi
 
-re=^[-]\|[\/\"\<\>$]
-if [[ "${nom}" =~ $re ]] ; then
+if [[ "${nom}" =~ ^[-]|[\/\"\<\>$] ]] ; then
    echo -e "\n::: Présence de caractère(s) dans '$nom' non autorisé(s) dans un nom de fichier. Abandon\n"
    exit
 fi

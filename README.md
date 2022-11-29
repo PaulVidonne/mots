@@ -1,4 +1,4 @@
-Présentation des fichiers de ce dépôt, le 26/11/2022.
+Présentation des fichiers de ce dépôt, le 29/11/2022.
  
 # mots #
 Ecrit en bash le logiciel **mots** version 6.51 b-20221021 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille.
@@ -17,7 +17,7 @@ Le script bash **locate.sh** version 3.00 b-20221019 est une sur-couche de la co
 *Aide détaillée : **locate.sh** --help*
 
 # find.sh # 
-Egalement en bash, le script **find.sh** version 1.02 b-20221126 est aussi une sur-couche de la commande 'find' permettant de retouver des fichiers ou répertoires à partir de leurs dates, de partie ou totalité de leur nom ou de leur contenu. Simplifiant la commande système, le choix des fichiers recherchés repose sur la réponse interactive aux questions suivantes :
+Egalement en bash, le script **find.sh** version 1.03 b-20221129 est aussi une sur-couche de la commande 'find' permettant de retouver des fichiers ou répertoires à partir de leurs dates, de partie ou totalité de leur nom ou de leur contenu. Simplifiant la commande système, le choix des fichiers recherchés repose sur la réponse interactive aux questions suivantes :
 
 * date de début des fichiers recherchés
 * date de fin des fichiers recherchés
@@ -61,9 +61,13 @@ Ecrit en bash, le script **litteral** version 1.10 b-20221021 transcrit en lettr
 
 # dow #
 
-le script bash **dow** version 1.01 b-20221110 établit la correspondance entre les dates du calendrier grégorien, celles du calendrier julien et celles de leurs numéros en "jours juliens" inventés par Joseph Juste Scaliger. La saisie de l'une de ces trois données affiche les deux autres ainsi que le jour de la semaine.
+Le script bash **dow** version 1.01 b-20221110 établit la correspondance entre les dates du calendrier grégorien, celles du calendrier julien et celles de leurs numéros en "jours juliens" inventés par Joseph Juste Scaliger. La saisie de l'une de ces trois données affiche les deux autres ainsi que le jour de la semaine.
 
 *Aide détaillée : **dow** --help*
+
+# clean #
+
+ Le script **clean** version 3.00 b-20221129 recherche les fichiers et répertoires contenant un  motif indiqué, les dénombre et les élimine si confirmation.
 
 # triangle #
 
