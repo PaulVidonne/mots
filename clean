@@ -4,10 +4,10 @@
 # cp "$0" "$file"
 # date
 
-version="3.00 b-20221129"
+version="3.01 b-20221130"
 usage()
 {
-   echo -e "::: Usage : [ $(basename $0) [--help | --version] | chemin ]"
+   echo -e "::: Usage : [ $(basename $0) [--help | --version] | chemin ]\n"
 }
 
 if [[ $@ == *--help* ]] ; then
@@ -69,14 +69,15 @@ fi
 
 if [[ $@ == *-d=* ]] ; then
    chemin=$(sed -E -e 's/.*d=()|\s.*/\1/g' <<<$@ )
-   if ! [ -d $chemin ] ; then
-      echo -e "\n::: Le chemin $chemin n'existe pas. Abandon"
-      usage
-      exit
-   fi
 else
    chemin=/mnt/sdb1
 fi
+if ! [ -d $chemin ] ; then
+   echo -e "\n::: Le chemin $chemin n'existe pas. Abandon"
+   usage
+   exit
+fi
+
 echo -e "\n::: Répertoire de recherche : "$chemin
 
 if [[ $@ == *-m=* ]] ; then
