@@ -61,7 +61,7 @@ Ecrit en bash, le script **litteral** version 1.10 b-20221021 transcrit en lettr
 
 # dow #
 
-Le script bash **dow** version 1.10 b-20221203 établit la correspondance entre les dates du calendrier grégorien, celles du calendrier julien et celles de leurs numéros en "jours juliens" inventés par Joseph Juste Scaliger. La saisie de l'une de ces trois données affiche les deux autres ainsi que le jour de la semaine. Une option affiche le jour de Pâques de l'année.
+Le script bash **dow** version 1.11 b-20221203 établit la correspondance entre les dates du calendrier grégorien, celles du calendrier julien et celles de leurs numéros en "jours juliens" inventés par Joseph Juste Scaliger. La saisie de l'une de ces trois données affiche les deux autres ainsi que le jour de la semaine. Une option affiche le jour de Pâques de l'année.
 
 *Aide détaillée : **dow** --help*
 

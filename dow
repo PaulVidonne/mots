@@ -10,7 +10,7 @@
 # cal --reform=gregorian est entièrement grégorien
 # Calcul de la date de pâques méthode Butcher-Meeus (grégorienne) Delambre (julienne)
 
-version="1.10 b-20221203"
+version="1.11 b-20221203"
 
 usage()
 {
@@ -113,7 +113,7 @@ if [ $# -lt 1 ] ; then
 fi
 
 # on teste si la ligne cmd contient un jdn
-jdn=$( sed -E -e 's/\ |-en|-j//g' <<< $@ )
+jdn=$( sed -E -e 's/\ |-en|-j|-p//g' <<< $@ )
 # alternative : re='^-?[0-9]*$' et if [[ $jdn =~ $re ]] ; then
 if [[ $jdn =~ ^-?[0-9]*$ ]] ; then
    if ([ $jdn -gt 5373557 ] || [ $jdn -lt 0 ]) ; then
@@ -226,6 +226,7 @@ i=$(echo "(100*($n - 49) + $i + $l)" | bc)
 yg=$i
 mg=$j
 dg=$k
+y=$i # pour paques
 }
 #-------------------------------------fonction jdntojul--------------------------------------
 function jdntojul()
@@ -252,7 +253,7 @@ if [ $y -lt 326 ] ; then
       echo -e "::: The date of Easter will not be fixed until 325\n"
    else
       echo -e "::: La date de Pâques ne sera arrêtée qu'en 325\n"
-  fi 
+   fi
 exit
 fi
 if ! [[ $@ == *-j* ]] ; then
