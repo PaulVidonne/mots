@@ -1,22 +1,32 @@
 #!/bin/bash
 
-file="tmp$(date +%H%M%S)"
+file="tmp$(date +%m%d-%H%M%S)"
 # cp "$0" "$file"
 # date
 
-version="1.10 b-20221021"
+version="2.00 b-20221208"
 
+usage()
+{
+   echo -e "::: Usage : $(basename $0) [--help | --version] nombre_en_chiffres [OPTIONS]"
+}
+echo
+if [[ $@ == *--version* ]] ; then
+   usage
+   echo -e "\n::: $(basename $0) version : $version\n"
+   exit
+fi
 if [[ $@ == *--help* ]] ; then
 echo
 cat << EOF
 PRESENTATION GENERALE
 
-   Usage   $(basename $0) [--help | --version] [OPTIONS]
+   Usage   $(basename $0) [--help | --version] nombre_en_chiffres [OPTIONS]
 
    Objet   le script $(basename $0) version $version transcrit en lettres les nombres
-           saisis en chiffres, en "français de France" actuel, dans le respect des règles
-           énoncées ci-dessous. le résultat est donné en échelle latine longue avec
-           alternance -ion -iard.
+           saisis en chiffres, en "français de France" actuel, dans le respect des
+           règles énoncées ci-dessous. Le résultat est donné en échelle latine longue
+           avec alternance -ion -iard. Le résultat peut être envoyé dans un fichier.
 
    Règles orthographiques
            les adjectifs numéraux cardinaux strictement inférieurs à cent sont reliés
@@ -34,72 +44,131 @@ PRESENTATION GENERALE
 
 OPTIONS
 
-   -u     le nom de l'unité suivant le nombre en lettres sera demandé, ainsi que celui
-          de son centième. En absence de cette option, l'unité n'est pas mentionnée et
-          les centièmes sont marqués "centièmes". Les pluriels des unités et centièmes
-          sont les singuliers suivis d'un "s".
+   -u=UNITE
+           nom de l'unité. En l'absence de cette option, l'unité n'est pas mentionnée.
+           Les pluriels des unités sont les singuliers suivis d'un "s".
 
-   -p     le résultat est envoyé dans un fichier intitulé "litteral.txt" avec vidage de
-          ce fichier s'il existe déjà.
+   -c=CENTIEME
+           nom du centième. En l'absence de cette option, les centièmes sont marqués
+           "centièmes". Les pluriels des centièmes sont les singuliers suivis d'un "s".
+
+   -p     le résultat est envoyé dans un fichier intitulé "litteral.txt" avec vidage
+          de ce fichier s'il existe déjà.
 
    -q     le résultat est ajouté à un fichier intitulé "litteral.txt".
 
 DIVERS
 
    exécutabilité
-          ce script a été réalisé sous GNU bash, version 5.1.8(1)-release-(x86_64-redhat-
-          linux-gnu). Il ne suppose l'installation d'aucun module particulier.
+          ce script a été réalisé sous GNU bash, version 5.2.9(1)-release-(x86_64-
+          redhat-linux-gnu). Il ne suppose l'installation d'aucun module particulier.
 
    bugs   merci de signaler bugs et suggestions à : paul at vidonne point fr
 
    licence
           Copyright (c) $(date +%Y) Paul Vidonne. Ce script peut être librement exécuté,
           diffusé et modifié dans les conditions de la 'Creative Commons Attribution-
-          NonCommercial-ShareAlike 3.0 Unported License' (CC-BY-NC-SA) publiée par Creative
-          Commons. Il est mis à disposition "tel quel", SANS AUCUNE GARANTIE de quelque
-          nature que ce soit et auprès de qui que ce soit. Plus d'informations (en anglais)
-          sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>, texte
-          intégral à  <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
+          NonCommercial-ShareAlike 3.0 Unported License' (CC-BY-NC-SA) publiée par
+          Creative Commons. Il est mis à disposition "tel quel", SANS AUCUNE GARANTIE
+          de quelque nature que ce soit et auprès de qui que ce soit. Plus d'informations
+          (en anglais) sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>,
+          texte intégral à  <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
 
 $(basename $0)                      version : $version                               ----
 EOF
 echo
 exit
 fi
-if [[ $@ == *--version* ]] ; then
-   echo -e "\n::: $(basename $0) version : $version\n"
-   exit
-fi
-if [[ $@ == *-p* ]] ; then
-   $(> litteral.txt)
-fi
-if [[ $@ == *-p* || $@ == *-q* ]] ; then
-   sortie_fichier="litteral.txt"
-else
-   sortie_fichier="/dev/null"
-fi
-
-# nom des variables
-# nb_num : le nombre entier saisi, ensuite transformé en 3*rang sans espaces
+#-----------------------------------------------------------------------------------
+# nom des variables :
+# nb_num : partie entière du nombre saisi, ensuite transformé en 3*rang sans espaces
 # nb_deci : partie décimale du nombre saisi
 # rang : groupes de trois chiffres de 0 le plus à droite (unités) à 63 (décilliards)
 # tri : groupe de trois chiffres
 # tab_nb_num : nb_num en tableau indicé
 # tabnb : tableau associatif final
-# tab_lib : tableau indicé des libellés
+# tab_lib : tableau indicé des libellés "un", "deux", etc.
+# tab_sing : tableau indicé des libéllés "mille", "million", etc.
 
-echo
-read -p "::: Nombre à convertir : " nb_num
-echo -e "\n::: Date : $(date)"  >> $sortie_fichier
-echo -e "::: Nombre à convertir : $nb_num"  >> $sortie_fichier
+if [ $# -lt 1 ] ; then
+   usage
+   echo -e "::: Ligne de commande '$(basename $0)' vide. Abandon.\n"
+   exit
+fi
 
-# le nombre peut etre saisi avec des espaces
-nb_num=$(sed -r -e 's/ //g' <<< $nb_num)
+# on teste si la ligne de commande contient un nombre
+nb_num=$( sed -E -e 's/[a-zA-Z ]*|[-=]//g' <<< $@)
+if [ -z $nb_num ]; then
+   usage
+   echo -e "::: La ligne de commande ne contient aucun nombre. Abandon\n"
+   exit
+fi
+
+if ( [[ $@ == *-u=* ]] && ! [[ $@ == *-c=* ]] ) || ( [[ $@ == *-c=* ]] && \
+   ! [[ $@ == *-u=* ]] ); then
+   usage
+   echo -e "::: La ligne de commande doit contenir -u=[UNITE] ET -c=[CENTIEME]. Abandon\n"
+   exit
+fi
+
+if [[ $@ == *-u=* ]] ; then
+   unit=$( sed -E -e 's/.*u=()|\s.*/\1/g' <<< $@ )
+   units=$unit"s"
+else
+   unit="no_unit"
+   units="no_units"
+fi
+if [[ $@ == *-c=* ]] ; then
+   centieme=$( sed -E -e 's/.*c=()|\s.*/\1/g' <<< $@ )
+   centiemes=$centieme"s"
+else
+   centieme="centième"
+   centiemes="centièmes"
+fi
+
+#--------------------------------------déclarations---------------------------------
+# déclarations pas avant car exigent les variables qui viennent d'être définies
+declare -A tabnb
+
+tab_lib=( [1]="un" [2]="deux" [3]="trois" [4]="quatre" [5]="cinq" [6]="six" [7]="sept" \
+          [8]="huit" [9]="neuf" [10]="dix" [11]="onze" [12]="douze" [13]="treize" \
+          [14]="quatorze" [15]="quinze" [16]="seize" [17]="dix-sept" [18]="dix-huit" \
+          [19]="dix-neuf" [20]="vingt" [30]="trente" [40]="quarante" [50]="cinquante" \
+          [60]="soixante" [70]="soixante-dix" [80]="quatre-vingt" )
+
+tab_sing=( [0]=$unit [1]="mille" [2]="million" [3]="milliard" [4]="billion" [5]="billiard" \
+           [6]="trillion" [7]="trilliard" [8]="quadrilllion" [9]="quadrilliard" \
+           [10]="quintillion" [11]="quintilliard" [12]="sextillion" [13]="sextilliard" \
+           [14]="septillion"  [15]="septilliard" [16]="octillion" [17]="octilliard" \
+           [18]="nonillion" [19]="nonilliard" [20]="decillion" [21]="decilliard")
+
+liste="decilliards decilliard decillions decillion nonilliards nonilliard nonillions \
+       nonillion octilliards octilliard octillions octillion septilliards septilliard \
+       septillions septillion sextilliards sextilliard sextillions sextillion \
+       quintilliards quintilliard quintillions quintillion quadrilliards quadrilliard \
+       quadrillions quadrilllion trilliards trilliard trillions trillion billiards \
+       billiard billions billion milliards milliard millions million mille $units $unit \
+       $centiemes $centieme"
+#-----------------------------------------------------------------------------------
+
+if [[ $@ == *-p* ]] ; then
+   $(> litteral.txt)
+fi
+if [[ $@ == *-p* || $@ == *-q* ]] ; then
+   fichier_sortie="litteral.txt"
+else
+   fichier_sortie="/dev/null"
+fi
+
+echo -e "-----------------------------------------------------------" >> $fichier_sortie
+echo -e "::: Date : $(date)"  >> $fichier_sortie
+echo -e "::: Commande : $(basename $0) $@" | tee -a $fichier_sortie
+echo -e "::: Nombre à convertir : $nb_num"  | tee -a $fichier_sortie
+
 nb_pt_virg=$(echo "$nb_num" | sed 's/./&\n/g' | grep -c -E "\.|,")
 # on decoupe le nombre saisi en partie entière et fractionnaire
 case $nb_pt_virg in
-   0 )
-     ;;
+   0 ) ;;
    1 )
      position=$(expr index "$nb_num" .)
      if [ $position -eq 0 ] ; then
@@ -109,17 +178,15 @@ case $nb_pt_virg in
      if [ ${#nb_deci} -eq 1 ]; then
         nb_deci=$nb_deci"0"
      fi
-     nb_num=${nb_num:0:(($position-1))}
-     ;;
+     nb_num=${nb_num:0:(($position-1))} ;;
    * )
-     echo -e "\n::: L'expression $nb_num n'est pas un nombre valable. Abandon\n"
-     exit
-     ;;
+     echo -e "\n::: L'expression $nb_num n'est pas un nombre valide. Abandon\n"
+     exit ;;
 esac
 char=0
 while [ $char -lt ${#nb_num} ] ; do
    if ! [[ ${nb_num:$char:1} == [0-9] ]] ; then
-      echo -e "\n::: L'expression $nb_num n'est pas un nombre valable. Abandon\n"
+      echo -e "\n::: L'expression $nb_num n'est pas un nombre valide. Abandon\n"
       exit
    fi
    char=$(($char + 1))
@@ -128,7 +195,7 @@ done
 nb_num=$(sed 's/^0*//g' <<< $nb_num)
 # exclusion donnée à 0
 if [ -z $nb_num ] && ([ -z $nb_deci ] || [ $nb_deci -eq 0 ]) ; then
-   echo -e "\n::: L'expression donnée n'est pas un nombre valable. Abandon\n"
+   echo -e "\n::: L'expression donnée n'est pas un nombre valide. Abandon\n"
    exit
 fi
 # le nombre est ensuite forcé à un multiple de 3 chiffres
@@ -137,19 +204,11 @@ if [ $l_nb_num -gt 66 ] ; then
    echo -e "::: $l_nb_num chiffres. Nombre supérieur aux décilliads (66 chiffres). Abandon\n"
    exit
 fi
+
 # le nombre est valable : indication des unités
-if [[ $@ == *-u* ]] ; then
-   read -p "::: Nom de l'unité  : " unit
-   units=$unit"s"
-   echo -e "::: Nom de l'unité : $unit" >>$sortie_fichier
-   read -p "::: Nom du centième : " centieme
-   centiemes=$centieme"s"
-   echo -e "::: Nom du centième : $centieme" >>$sortie_fichier
-else
-   unit="no_unit"
-   units="no_units"
-   centieme="centième"
-   centiemes="centièmes"
+if [[ $@ == *-u* ]] && [[ $@ == *-c* ]] ; then
+   echo -e "::: Nom de l'unité : $unit" | tee -a $fichier_sortie
+   echo -e "::: Nom du centième : $centieme" | tee -a $fichier_sortie
 fi
 # le nombre doit comporter un multiple de 3 chiffres
 if (( $l_nb_num % 3 == 1)) ; then
@@ -178,26 +237,8 @@ if ! [ -z $nb_num ] ; then
      fi
    fi
 fi
-#-------------------déclarations-------------------------
-declare -A tabnb
-
-tab_lib=( [1]="un" [2]="deux" [3]="trois" [4]="quatre" [5]="cinq" [6]="six" [7]="sept" [8]="huit" [9]="neuf" \
-          [10]="dix" [11]="onze" [12]="douze" [13]="treize" [14]="quatorze" [15]="quinze" [16]="seize" [17]="dix-sept" \
-          [18]="dix-huit" [19]="dix-neuf" [20]="vingt" [30]="trente" [40]="quarante" [50]="cinquante" [60]="soixante" \
-          [70]="soixante-dix" [80]="quatre-vingt" )
-
-tab_sing=( [0]=$unit [1]="mille" [2]="million" [3]="milliard" [4]="billion" [5]="billiard" [6]="trillion" [7]="trilliard" \
-           [8]="quadrilllion" [9]="quadrilliard" [10]="quintillion" [11]="quintilliard" [12]="sextillion" [13]="sextilliard"\
-           [14]="septillion"  [15]="septilliard" [16]="octillion" [17]="octilliard" [18]="nonillion" [19]="nonilliard" \
-           [20]="decillion" [21]="decilliard")
-
-liste="decilliards decilliard decillions decillion nonilliards nonilliard nonillions nonillion octilliards octilliard \
-octillions octillion septilliards septilliard septillions septillion sextilliards sextilliard sextillions sextillion \
-quintilliards quintilliard quintillions quintillion quadrilliards quadrilliard quadrillions quadrilllion trilliards \
-trilliard trillions trillion billiards billiard billions billion milliards milliard millions million mille $units $unit $centiemes $centieme"
-
-#-----------------fonction dizaines------------------------
-dizaines()
+#-----------------------------------fonction dizaines-------------------------------
+function dizaines()
 {
 # tri_litt est remis à vide sinon conserve dernière valeur
 if [ $2 -eq "1" ]; then
@@ -207,10 +248,6 @@ tri_=$1
 cent=$(($( expr $tri_ / 100 )))
 diz=$(($( expr $tri_ % 100 ) / 10))
 unit=$(($( expr $tri_ % "$cent$diz"0)))
-# echo "tri" : $tri_
-# echo "cent": $cent
-# echo "diz" : $diz
-# echo "uni" : $unit
 case $diz in
    2|3|4|5|6 )
      diz="${tab_lib[diz * 10]}"
@@ -220,8 +257,7 @@ case $diz in
         unit=" et ${tab_lib[unit]}"
      else
         unit="-${tab_lib[unit]}"
-     fi
-    ;;
+     fi ;;
    7 )
      diz=6
      diz="${tab_lib[diz * 10]}"
@@ -229,8 +265,7 @@ case $diz in
         unit=" et ${tab_lib[unit + 10]}"
      else
         unit="-${tab_lib[unit + 10]}"
-     fi
-     ;;
+     fi  ;;
    8 )
      diz="${tab_lib[diz * 10]}"
      if [ $unit -eq 0 ] && [ $rang -ne 1 ]; then
@@ -239,28 +274,24 @@ case $diz in
        unit=""
      else
        unit="-${tab_lib[unit]}"
-     fi
-     ;;
+     fi ;;
    9 )
      diz=8
      diz="${tab_lib[diz * 10]}"
-     unit="-${tab_lib[unit + 10]}"
-     ;;
+     unit="-${tab_lib[unit + 10]}" ;;
 esac
 tri_litt="$tri_litt $diz$unit"
 }
-#-----------------fonction transform------------------------
-transform()
+#-----------------------------------fonction transform------------------------------
+function transform()
 {
 # $1 est le montant en tri, $2 unit au pluriel ; $3 unit au singulier
 # traitement des centaines
 case $( expr $tri / 100 ) in
    0 )
-      tri_litt=""
-      ;;
+      tri_litt="" ;;
    1 )
-      tri_litt="cent"
-      ;;
+      tri_litt="cent" ;;
    2|3|4|5|6|7|8|9 )
       if [ -z "$2" ] || [ $2 == "mille" ] ; then
          tri_litt="${tab_lib[$tri / 100]} cent"
@@ -268,60 +299,55 @@ case $( expr $tri / 100 ) in
          tri_litt="${tab_lib[$tri / 100]} cents"
       else
          tri_litt="${tab_lib[$tri / 100]} cent"
-       fi
-     ;;
+       fi ;;
 esac
-# traitement des dizaines et unités de tri
+# traitement des dizaines et unités de "tri"
 case $( expr $tri % 100 ) in
    0 )
-      tri_litt="$tri_litt ${tab_lib[ $(expr $tri % 100 ) ]}"
-      ;;
+      tri_litt="$tri_litt ${tab_lib[ $(expr $tri % 100 ) ]}" ;;
    1 )
       if [ $rang -eq 1 ] ; then
          tri_litt=" "
       else
          tri_litt="$tri_litt ${tab_lib[ $(expr $tri % 100 ) ]}"
-      fi
-      ;;
+      fi ;;
    2|3|4|5|6|7|8|9|1*|20 )
-      tri_litt="$tri_litt ${tab_lib[ $(expr $tri % 100 ) ]}"
-      ;;
+      tri_litt="$tri_litt ${tab_lib[ $(expr $tri % 100 ) ]}" ;;
    * )
       # traitement des dizaines et unités de 21 à 99
-      dizaines $tri 0
-      ;;
+      dizaines $tri 0 ;;
 esac
-# affectation du résultat dans tab_nb
+# affectation du résultat dans tabnb
 if [ -n "$tri_litt" ] || [ -n "$2" ] ; then
    tabnb[$2]="$tri_litt"
 fi
 }
-#-----------------fonction calcule----------------------------
+#-----------------------------------fonction calcule--------------------------------
 # dans calcule : $1 valeur de tri, $2 pluriel, $3 singulier
-calcule()
+function calcule()
 {
 tri=$1
-if [ $tri -ne 0 ] ; then            # tri n'est pas zéro
-    if [ $tri -gt 1 ] ; then        # mais il est plus de 1
-       transform $1 $2              # transform  avec tri et pluriel
-    else                            # tri vaut 1
+if [ $tri -ne 0 ] ; then        # tri n'est pas zéro
+    if [ $tri -gt 1 ] ; then    # mais il est plus de 1
+       transform $1 $2          # transform  avec tri et pluriel
+    else                        # tri vaut 1
     if [ $nb_num_gt_1 -eq 1 ] && [ $rang -eq 0 ] ; then
-          transform $1 $2           # en rang zéro avec nb_num > 1  transform avec tri et pluriel
+          transform $1 $2       # rang zéro avec nb_num > 1 transform avec tri et pluriel
        else
-          transform $1 $3           # en rang zéro avec nb_num = 1  tansform avec tri et singulier
+          transform $1 $3       # rang zéro avec nb_num = 1 transform avec tri et singulier
        fi
     fi
-else                               # tri est à 000
+else                            # tri est à 000
     if [ $nb_num_gt_1 -eq 1 ] && [ $rang -eq 0 ] ; then
-       transform $1 $2              # en rang zéro avec nb_num > 1  transform avec tri et pluriel
+       transform $1 $2          # rang zéro avec nb_num > 1 transform avec tri et pluriel
     else
-       transform $1 " "             # sinon transform avec tri et sans index
+       transform $1 " "         # sinon transform avec tri et sans index
     fi
 fi
 }
-#--------------------main----------------------------
+#------------------------------------------main-------------------------------------
 # traitement des entiers
-while [ $rang -gt 0 ] ;do
+while [ $rang -gt 0 ] ; do
    rang=$(($rang -1))
    tab_plur=${tab_sing[$rang]}"s"
    if [ $tab_plur == "milles" ] ; then
@@ -331,12 +357,10 @@ while [ $rang -gt 0 ] ;do
 done
 # traitement des décimales
 case $nb_deci in
-   "" )
-      ;;
+   "" ) ;;
    00 )
       nb_deci=".00"
-      tabnb[$centieme]="zéro"
-      ;;
+      tabnb[$centieme]="zéro" ;;
    0*|2|3|4|5|6|7|8|9|1*|20 )
       tri_litt=""
       tri_litt="$tri_litt ${tab_lib[ $nb_deci ]}"
@@ -345,13 +369,11 @@ case $nb_deci in
       else
          tabnb[$centieme]="$tri_litt"
       fi
-      nb_deci=".$nb_deci"
-      ;;
+      nb_deci=".$nb_deci" ;;
    * )
       dizaines $nb_deci 1
       tabnb[$centiemes]="$tri_litt"
-      nb_deci=".$nb_deci"
-      ;;
+      nb_deci=".$nb_deci"  ;;
 esac
 
 if [ $l_nb_num -lt 2 ]; then
@@ -366,8 +388,8 @@ else
    echelle=""
 fi
 
-echo -e "::: \c" | tee -a $sortie_fichier
-echo -e "Soit : "$nb_num_hr$nb_deci" ($l_nb_num $nchiffre pour la partie entière$echelle)\c" | tee -a $sortie_fichier
+echo -e "::: \c" | tee -a $fichier_sortie
+echo -e "Soit : "$nb_num_hr$nb_deci" ($l_nb_num $nchiffre pour la partie entière$echelle)\c" | tee -a $fichier_sortie
 for i in $liste ; do
    if [[ -n ${tabnb["$i"]} ]] ; then
       affiche=$affiche" ${tabnb["$i"]} $i"
@@ -377,12 +399,11 @@ done
 affiche=$(sed -r -e 's/no_unit|no_units/ /g' <<<$affiche)
 # ensuite enlever les blancs répétés
 affiche=$(sed -e 's/ \+/ /g' <<<$affiche)
-echo -e "\n:::$affiche" | tee -a $sortie_fichier
-echo | tee -a $sortie_fichier
+echo -e "\n:::$affiche" | tee -a $fichier_sortie
+echo | tee -a $fichier_sortie
 
 if [[ $@ == *-p* || $@ == *-q* ]] ; then
    echo -e "::: Les résultats ci-dessus figurent dans le fichier : $(pwd)/litteral.txt\n"
 fi
-
 
 exit
