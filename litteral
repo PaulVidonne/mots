@@ -195,7 +195,7 @@ done
 # enlèvement des zéros de tête
 nb_num=$(sed 's/^0*//g' <<< $nb_num)
 # exclusion donnée à 0
-if [[ -z $nb_num ]] && ([[ -z $nb_deci ]] || [[ $nb_deci -eq 0 ]]) ; then
+if [ -z $nb_num ] && ([ -z $nb_deci ] || [ $nb_deci -eq 0 ]) ; then
    echo -e "\n::: L'expression donnée n'est pas un nombre valide. Abandon\n"
    exit
 fi
