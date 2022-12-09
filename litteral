@@ -1,10 +1,11 @@
 #!/bin/bash
 
+original=litteral
 file="tmp$(date +%m%d-%H%M%S)"
 # cp "$0" "$file"
 # date
 
-version="2.00 b-20221208"
+version="2.10 b-20221209"
 
 usage()
 {
@@ -74,7 +75,7 @@ DIVERS
           (en anglais) sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>,
           texte intégral à  <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
 
-$(basename $0)                      version : $version                               ----
+$(basename $0)/$original             version : $version                               ----
 EOF
 echo
 exit
@@ -98,7 +99,7 @@ fi
 
 # on teste si la ligne de commande contient un nombre
 nb_num=$( sed -E -e 's/[a-zA-Z ]*|[-=]//g' <<< $@)
-if [ -z $nb_num ]; then
+if [[ -z $nb_num ]] ; then
    usage
    echo -e "::: La ligne de commande ne contient aucun nombre. Abandon\n"
    exit
@@ -194,7 +195,7 @@ done
 # enlèvement des zéros de tête
 nb_num=$(sed 's/^0*//g' <<< $nb_num)
 # exclusion donnée à 0
-if [ -z $nb_num ] && ([ -z $nb_deci ] || [ $nb_deci -eq 0 ]) ; then
+if [[ -z $nb_num ]] && ([[ -z $nb_deci ]] || [[ $nb_deci -eq 0 ]]) ; then
    echo -e "\n::: L'expression donnée n'est pas un nombre valide. Abandon\n"
    exit
 fi
@@ -226,7 +227,7 @@ while [ $i -le $rang ]; do
    ((i++))
 done
 # variable nécessaire pour les nombres supérieurs au billiard (fct calcule)
-if ! [ -z $nb_num ] ; then
+if ! [[ -z $nb_num ]] ; then
    if [ $l_nb_num -gt 1 ] ; then
       nb_num_gt_1=1
    else
@@ -293,7 +294,7 @@ case $( expr $tri / 100 ) in
    1 )
       tri_litt="cent" ;;
    2|3|4|5|6|7|8|9 )
-      if [ -z "$2" ] || [ $2 == "mille" ] ; then
+      if [[ -z "$2" ]] || [ $2 == "mille" ] ; then
          tri_litt="${tab_lib[$tri / 100]} cent"
       elif [[ $( expr $tri % 100 ) -eq 0 ]] ; then
          tri_litt="${tab_lib[$tri / 100]} cents"
@@ -318,7 +319,7 @@ case $( expr $tri % 100 ) in
       dizaines $tri 0 ;;
 esac
 # affectation du résultat dans tabnb
-if [ -n "$tri_litt" ] || [ -n "$2" ] ; then
+if [[ -n "$tri_litt" ]] || [[ -n "$2" ]] ; then
    tabnb[$2]="$tri_litt"
 fi
 }
@@ -362,8 +363,9 @@ case $nb_deci in
       nb_deci=".00"
       tabnb[$centieme]="zéro" ;;
    0*|2|3|4|5|6|7|8|9|1*|20 )
+      nb_deci_=$(sed 's/^0*//g' <<< $nb_deci) # contournement bug 08 et 09
       tri_litt=""
-      tri_litt="$tri_litt ${tab_lib[ $nb_deci ]}"
+      tri_litt="$tri_litt ${tab_lib[ $nb_deci_ ]}"
       if [ $tri_litt != "un" ] ; then
          tabnb[$centiemes]="$tri_litt"
       else
@@ -386,6 +388,14 @@ if [ $l_nb_num -gt 12 ]; then
    echelle=$(echo ", nombre compris entre 10^"$((( $l_nb_num - 1 ))) "et 10^"$l_nb_num -1)
 else
    echelle=""
+fi
+# corrections valeur unité zéro
+nb_num_hr=$(sed 's/^\s*//g' <<< $nb_num_hr)
+if [[ -z $nb_num_hr ]] ; then
+   nb_num_hr=0
+fi
+if [ $l_nb_num == 0 ] ; then
+   l_nb_num=1
 fi
 
 echo -e "::: \c" | tee -a $fichier_sortie
