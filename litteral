@@ -5,15 +5,13 @@ file="tmp$(date +%m%d-%H%M%S)"
 # cp "$0" "$file"
 # date
 
-version="2.10 b-20221209"
+version="2.20 b-20221210"
 
 usage()
 {
    echo -e "::: Usage : $(basename $0) [--help | --version] nombre_en_chiffres [OPTIONS]"
 }
-echo
 if [[ $@ == *--version* ]] ; then
-   usage
    echo -e "\n::: $(basename $0) version : $version\n"
    exit
 fi
@@ -80,6 +78,7 @@ EOF
 echo
 exit
 fi
+echo
 #-----------------------------------------------------------------------------------
 # nom des variables :
 # nb_num : partie entière du nombre saisi, ensuite transformé en 3*rang sans espaces
@@ -114,6 +113,11 @@ fi
 
 if [[ $@ == *-u=* ]] ; then
    unit=$( sed -E -e 's/.*u=()|\s.*/\1/g' <<< $@ )
+   if [[ -z $unit ]] ; then
+     usage
+     echo -e "::: Unité (-u=) mal définie. Abandon\n"
+     exit
+   fi
    units=$unit"s"
 else
    unit="no_unit"
@@ -121,6 +125,11 @@ else
 fi
 if [[ $@ == *-c=* ]] ; then
    centieme=$( sed -E -e 's/.*c=()|\s.*/\1/g' <<< $@ )
+   if [[ -z $centieme ]] ; then
+     usage
+     echo -e "::: Centième (-c=) mal défini. Abandon\n"
+     exit
+   fi
    centiemes=$centieme"s"
 else
    centieme="centième"
@@ -152,20 +161,12 @@ liste="decilliards decilliard decillions decillion nonilliards nonilliard nonill
        $centiemes $centieme"
 #-----------------------------------------------------------------------------------
 
-if [[ $@ == *-p* ]] ; then
-   $(> litteral.txt)
-fi
 if [[ $@ == *-p* || $@ == *-q* ]] ; then
    fichier_sortie="litteral.txt"
 else
    fichier_sortie="/dev/null"
 fi
-
-echo -e "-----------------------------------------------------------" >> $fichier_sortie
-echo -e "::: Date : $(date)"  >> $fichier_sortie
-echo -e "::: Commande : $(basename $0) $@" | tee -a $fichier_sortie
-echo -e "::: Nombre à convertir : $nb_num"  | tee -a $fichier_sortie
-
+nb_num_svg=$nb_num
 nb_pt_virg=$(echo "$nb_num" | sed 's/./&\n/g' | grep -c -E "\.|,")
 # on decoupe le nombre saisi en partie entière et fractionnaire
 case $nb_pt_virg in
@@ -205,8 +206,14 @@ if [ $l_nb_num -gt 66 ] ; then
    echo -e "::: $l_nb_num chiffres. Nombre supérieur aux décilliads (66 chiffres). Abandon\n"
    exit
 fi
-
-# le nombre est valable : indication des unités
+# le nombre est valable : sauvegarde fichier et indication des unités
+if [[ $@ == *-p* ]] ; then
+   $(> litteral.txt)
+fi
+echo -e "-----------------------------------------------------------" >> $fichier_sortie
+echo -e "::: Date : $(date)"  >> $fichier_sortie
+echo -e "::: Commande : $(basename $0) $@" | tee -a $fichier_sortie
+echo -e "::: Nombre à convertir : $nb_num_svg"  | tee -a $fichier_sortie
 if [[ $@ == *-u* ]] && [[ $@ == *-c* ]] ; then
    echo -e "::: Nom de l'unité : $unit" | tee -a $fichier_sortie
    echo -e "::: Nom du centième : $centieme" | tee -a $fichier_sortie
