@@ -5,12 +5,8 @@ file="tmp$(date +%m%d-%H%M%S)"
 # cp "$0" "$file"
 # date
 
-version="2.20 b-20221210"
+version="2.30 b-20221217"
 
-usage()
-{
-   echo -e "::: Usage : $(basename $0) [--help | --version] nombre_en_chiffres [OPTIONS]"
-}
 if [[ $@ == *--version* ]] ; then
    echo -e "\n::: $(basename $0) version : $version\n"
    exit
@@ -89,6 +85,11 @@ echo
 # tabnb : tableau associatif final
 # tab_lib : tableau indicé des libellés "un", "deux", etc.
 # tab_sing : tableau indicé des libéllés "mille", "million", etc.
+
+usage()
+{
+   echo -e "::: Usage : $(basename $0) [--help | --version] nombre_en_chiffres [OPTIONS]"
+}
 
 if [ $# -lt 1 ] ; then
    usage
@@ -406,7 +407,8 @@ if [ $l_nb_num == 0 ] ; then
 fi
 
 echo -e "::: \c" | tee -a $fichier_sortie
-echo -e "Soit : "$nb_num_hr$nb_deci" ($l_nb_num $nchiffre pour la partie entière$echelle)\c" | tee -a $fichier_sortie
+echo -e "Soit : "$nb_num_hr$nb_deci" ($l_nb_num $nchiffre pour la partie entière$echelle)\c" \
+        | tee -a $fichier_sortie
 for i in $liste ; do
    if [[ -n ${tabnb["$i"]} ]] ; then
       affiche=$affiche" ${tabnb["$i"]} $i"

@@ -7,7 +7,7 @@ Ecrit en bash le logiciel **mots** version 6.51 b-20221021 décompte les mots, l
 *Aide très détaillée : **mots** --help*
 
 # locate.sh #
-Le script bash **locate.sh** version 3.10 b-20221208 est une sur-couche de la commande 'locate'  permettant de retouver des fichiers ou répertoires dont la liste figure dans la base de données générée par 'updatedb'. Il donne la liste de fichiers et de répertoires répondant à la recherche, avec leurs meta données (permissions, propriétaire, taille, date). Les dates des fichiers trouvés sont paramétrables et peuvent être les dates de :
+Le script bash **locate.sh** version 3.20 b-20221215 est une sur-couche de la commande 'locate'  permettant de retouver des fichiers ou répertoires dont la liste figure dans la base de données générée par 'updatedb'. Il donne la liste de fichiers et de répertoires répondant à la recherche, avec leurs meta données (permissions, propriétaire, taille, date). Les dates des fichiers trouvés sont paramétrables et peuvent être les dates de :
 
 * dernière modification (defaut)
 * dernier accès
@@ -47,7 +47,7 @@ Le script **financial** version 1.10 b-20221111, en python, calcule les montants
 
 # litteral #
 
-Ecrit en bash, le script **litteral** version 2.20 b-20221210 transcrit en lettres les nombres saisis en chiffres, en "français de France" actuel, dans le respect des règles énoncées ci-dessous. le résultat est donné en échelle latine longue avec alternance -ion -iard. Le résultat peut être envoyé dans un fichier.
+Ecrit en bash, le script **litteral** version 2.30 b-20221217 transcrit en lettres les nombres saisis en chiffres, en "français de France" actuel, dans le respect des règles énoncées ci-dessous. le résultat est donné en échelle latine longue avec alternance -ion -iard. Le résultat peut être envoyé dans un fichier.
 
 #### Règles orthographiques ####
 
