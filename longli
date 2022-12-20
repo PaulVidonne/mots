@@ -1,0 +1,149 @@
+#!/bin/bash
+
+file="tmp$(date +%m%d-%H%M%S)"
+# cp "$0" "$file"
+# date
+unset file
+
+set -f  # doit être présent AUSSI avant lancement de la commande pour éviter le globbing
+
+origin=longli
+version="1.00 b-20221220"
+
+if [[ $@ == *--version* ]] ; then
+   echo -e "\n::: $(basename $0) version : $version\n"
+   exit
+fi
+if [[ $@ == *--help* ]] ; then
+echo
+cat << EOF
+PRESENTATION GENERALE
+
+  Usage   $(basename $0) [--help | --version] fichier [LONGUEUR][OPTION]
+
+  Objet   le script $(basename $0) version $version compte le nombre de caractères des
+          lignes d'un fichier texte et affiche le début de celles qui dépassent une
+          longueur définie en paramétre (100 caractères par défaut).
+
+OPTION
+
+  -c=CHARSET
+          dans le cas ou le charset du fichier analysé n'est pas reconnu, tente de le
+          convertir en utf-8 à partir du charset CHARSET.
+
+DIVERS
+
+   exécutabilité
+          ce script a été réalisé sous GNU bash, version 5.2.9(1)-release-(x86_64-
+          redhat-linux-gnu). Il demande la présence du module 'iconv' pour les
+          conversions de charset.
+
+   bugs   merci de signaler bugs et suggestions à : paul at vidonne point fr
+
+   licence
+          Copyright (c) 2022 Paul Vidonne. Ce script peut être librement exécuté,
+          diffusé et modifié dans les conditions de la 'Creative Commons Attribution-
+          NonCommercial-ShareAlike 3.0 Unported License' (CC-BY-NC-SA) publiée par
+          Creative Commons. Il est mis à disposition "tel quel", SANS AUCUNE GARANTIE
+          de quelque nature que ce soit et auprès de qui que ce soit. Plus d'informations
+          (en anglais) sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>,
+          texte intégral à <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
+
+$(basename $0)/$origin              version : $version                               ----
+EOF
+echo
+exit
+fi
+echo
+usage()
+{
+   echo -e "::: Usage $(basename $0) [--help | --version] fichier [LONGUEUR][OPTION]"
+}
+
+if [ $# -lt 1 ] ; then
+   usage
+   echo -e "::: Ligne de commande '$(basename $0)' vide. Abandon.\n"
+   exit
+fi
+if [[ $@ == *-c=* ]] ; then
+   char_set=$(sed -E -e 's/.*-c=()|\s.*/\1/g' <<< $@)
+   iconv -l | grep -i -e "\b$char_set\b" >/dev/null
+   if [ $? == 1 ] ; then
+      usage
+      echo -e "::: Le charset \"$char_set\" n'est pas reconnu. Abandon\n"
+      exit
+   fi
+   file=$( sed -E -e 's/\-c\='$char_set'//g' <<< $@)
+   file=$( sed -E -e 's/(^|\s)[^a-z]*(\s|$)//g' <<< $file )
+   if [[ -z $file ]] ; then
+      usage
+      echo -e "::: Ligne de commande '$(basename $0) $@' sans nom de fichier. Abandon\n"
+      exit
+   fi
+   max=$( sed -E -e 's/'$char_set'//g' <<< $@ )
+   max=$( sed -E -e 's/'"$file"'//g' <<< $max  )
+else
+   file=$( sed -E -e 's/(^|\s)[^a-z]*(\s|$)//g' <<< $@ )
+   max=$( sed -E -e 's/'"$file"'//g' <<< $@ )
+fi
+max=$( sed -E -e 's/[^0-9]//g' <<< $max )
+if [[ -z $max ]] ; then
+   max=100
+fi
+if [[ "$file" =~ ^-.*$ ]] ; then
+    usage
+    echo -e "::: Le fichier '$file' ne peut être traité. Abandon\n"
+    exit
+fi
+if ! [[ -f $file ]] ; then
+   usage
+   echo -e "::: Le fichier '$file' n'existe pas. Abandon\n"
+   exit
+fi
+char_set_f=$(file -i "$file" | sed -e "s/.*charset=//")
+if [[ $char_set_f == binary ]] ; then
+   usage
+   echo -e "::: Le fichier '$file' est un fichier binaire. Abandon\n"
+   exit
+else
+  echo -e "::: Analyse du fichier '$file', max $max caractères."
+fi
+
+tmp=$( cat -n "$file" | sed 's/\\n/ n/g' | sed 's/\\c/ c/g' )
+if ! [[ $char_set_f == utf-8 ]] ; then
+   if [[ $char_set_f == *unknown*  &&  -n $char_set ]] ; then
+     echo -e "::: Conversion de '$file' charcet $char_set en utf-8\n"
+     tmp=$(iconv -c -f $char_set -t utf-8 <<< $tmp)
+   elif [[ $char_set_f == *unknown*  &&  -z $char_set ]] ; then
+     echo -e "::: Charset du fichier '$file' inconnu. Le résultat  peut être"
+     echo -e "::: erroné. Essayez d'en définir un avec l'option -c=CHARSET.\n"
+   else
+     echo -e "::: Conversion de '$file' charcet $char_set_f en utf-8\n"
+     tmp=$(iconv -c -f $char_set_f -t utf-8 <<< $tmp)
+   fi
+else
+   echo
+fi
+nb=0
+
+while read -r line ; do
+   num_li=$(sed -E -e 's/(^[0-9]*).*/\1/g' <<<$line)
+   l_num_li=${#num_li}
+   long=$((${#line}-$l_num_li))
+   if [[ $long -gt $max ]] ; then
+      if [[ $(uname -n) == sirius ]] ; then
+      echo -e Ligne : $num_li "\t" Long : $long "\t" : ${line:$l_num_li:120}
+      else
+         echo -e Ligne : $num_li  Long : $long  : ${line:$l_num_li:85}
+      fi
+      let nb++
+   fi
+   tot_long=$(( $tot_long + $long ))
+done <<< $tmp
+if [[ -z $num_li ]] ; then
+   num_li=0
+fi
+echo -e "\n::: Sur $num_li ligne(s) $nb dépasse(nt) $max caractères"
+echo -e "::: Longueur moyenne des lignes "$(( $tot_long / $num_li ))" caractères"
+echo -e "::: Fin analyse fichier '$file'\n"
+
