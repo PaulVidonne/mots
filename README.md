@@ -17,7 +17,7 @@ Le script bash **locate.sh** version 3.20 b-20221215 est une sur-couche de la co
 *Aide détaillée : **locate.sh** --help*
 
 # find.sh # 
-Egalement en bash, le script **find.sh** version 1.03 b-20221129 est aussi une sur-couche de la commande 'find' permettant de retouver des fichiers ou répertoires à partir de leurs dates, de partie ou totalité de leur nom ou de leur contenu. Simplifiant la commande système, le choix des fichiers recherchés repose sur la réponse interactive aux questions suivantes :
+Egalement en bash, le script **find.sh** version 1.04 b-20221214 est aussi une sur-couche de la commande 'find' permettant de retouver des fichiers ou répertoires à partir de leurs dates, de partie ou totalité de leur nom ou de leur contenu. Simplifiant la commande système, le choix des fichiers recherchés repose sur la réponse interactive aux questions suivantes :
 
 * date de début des fichiers recherchés
 * date de fin des fichiers recherchés

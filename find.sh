@@ -4,7 +4,7 @@
 # cp "$0" "$file"
 # date
 
-version="1.03 b-20221129"
+version="1.04 b-20221224"
 
 if [[ $@ == *--help* ]] ; then
 echo
@@ -172,7 +172,7 @@ if [ -z "$nom" ] ; then
    nom="*"
 fi
 
-if [[ "${nom}" =~ ^[-]|[\/\"\<\>$] ]] ; then
+if [[ "${nom}" =~ ^[\/\"\<\>$] ]] ; then
    echo -e "\n::: Présence de caractère(s) dans '$nom' non autorisé(s) dans un nom de fichier. Abandon\n"
    exit
 fi
