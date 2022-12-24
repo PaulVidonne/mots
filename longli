@@ -8,7 +8,7 @@ unset file
 set -f  # doit être présent AUSSI avant lancement de la commande pour éviter le globbing
 
 origin=longli
-version="1.00 b-20221220"
+version="1.10 b-20221224"
 
 if [[ $@ == *--version* ]] ; then
    echo -e "\n::: $(basename $0) version : $version\n"
@@ -23,7 +23,7 @@ PRESENTATION GENERALE
 
   Objet   le script $(basename $0) version $version compte le nombre de caractères des
           lignes d'un fichier texte et affiche le début de celles qui dépassent une
-          longueur définie en paramétre (100 caractères par défaut).
+          longueur définie en paramètre (100 caractères par défaut).
 
 OPTION
 
@@ -67,59 +67,60 @@ if [ $# -lt 1 ] ; then
 fi
 if [[ $@ == *-c=* ]] ; then
    char_set=$(sed -E -e 's/.*-c=()|\s.*/\1/g' <<< $@)
-   iconv -l | grep -i -e "\b$char_set\b" >/dev/null
+   iconv -l | grep -i -E "(^|\s)$char_set(\s|$|//)" > /dev/null
    if [ $? == 1 ] ; then
       usage
-      echo -e "::: Le charset \"$char_set\" n'est pas reconnu. Abandon\n"
+      echo -e "::: Le charset '$char_set' n'est pas reconnu. Abandon\n"
       exit
    fi
-   file=$( sed -E -e 's/\-c\='$char_set'//g' <<< $@)
-   file=$( sed -E -e 's/(^|\s)[^a-z]*(\s|$)//g' <<< $file )
-   if [[ -z $file ]] ; then
-      usage
-      echo -e "::: Ligne de commande '$(basename $0) $@' sans nom de fichier. Abandon\n"
-      exit
-   fi
-   max=$( sed -E -e 's/'$char_set'//g' <<< $@ )
-   max=$( sed -E -e 's/'"$file"'//g' <<< $max  )
-else
-   file=$( sed -E -e 's/(^|\s)[^a-z]*(\s|$)//g' <<< $@ )
-   max=$( sed -E -e 's/'"$file"'//g' <<< $@ )
 fi
+
+file=$( sed -E -e 's/\-c\='$char_set'//g' <<< $@)
+file=$( sed -E -e 's/(^|\s)[^a-zA-Z]*(\s|$)//g' <<< $file )
+
+if [[ -z $file ]] ; then
+   usage
+   echo -e "::: Ligne de commande '$(basename $0) $@' sans nom de fichier. Abandon\n"
+   exit
+fi
+max=$( sed -E -e 's/'"\b$char_set\b"'//g' <<< $@ )
+max=$( sed -E -e 's/'"$file"'//g' <<< $max  )
 max=$( sed -E -e 's/[^0-9]//g' <<< $max )
 if [[ -z $max ]] ; then
    max=100
-fi
-if [[ "$file" =~ ^-.*$ ]] ; then
-    usage
-    echo -e "::: Le fichier '$file' ne peut être traité. Abandon\n"
-    exit
 fi
 if ! [[ -f $file ]] ; then
    usage
    echo -e "::: Le fichier '$file' n'existe pas. Abandon\n"
    exit
 fi
+if [[ "$file" =~ ^-.*$ ]] ; then
+   echo -e "::: Le traitement direct des fichiers commençant par '-' n'est pas possible"
+   echo -e "::: Le fichier '$file' sera traité sous le nom temporaire 'longli_tmptmp'.\n"
+   cp -- "$file" longli_tmptmp
+   file=longli_tmptmp
+fi
+
 char_set_f=$(file -i "$file" | sed -e "s/.*charset=//")
 if [[ $char_set_f == binary ]] ; then
    usage
    echo -e "::: Le fichier '$file' est un fichier binaire. Abandon\n"
    exit
 else
-  echo -e "::: Analyse du fichier '$file', max $max caractères."
+   echo -e "::: Analyse du fichier '$file', max $max caractères."
 fi
 
 tmp=$( cat -n "$file" | sed 's/\\n/ n/g' | sed 's/\\c/ c/g' )
 if ! [[ $char_set_f == utf-8 ]] ; then
    if [[ $char_set_f == *unknown*  &&  -n $char_set ]] ; then
-     echo -e "::: Conversion de '$file' charcet $char_set en utf-8\n"
-     tmp=$(iconv -c -f $char_set -t utf-8 <<< $tmp)
+      echo -e "::: Conversion de '$file' charcet $char_set en utf-8\n"
+      tmp=$(iconv -c -f $char_set -t utf-8 <<< $tmp)
    elif [[ $char_set_f == *unknown*  &&  -z $char_set ]] ; then
-     echo -e "::: Charset du fichier '$file' inconnu. Le résultat  peut être"
-     echo -e "::: erroné. Essayez d'en définir un avec l'option -c=CHARSET.\n"
+      echo -e "::: Charset du fichier '$file' inconnu. Le résultat  peut être"
+      echo -e "::: erroné. Essayez d'en définir un avec l'option -c=CHARSET.\n"
    else
-     echo -e "::: Conversion de '$file' charcet $char_set_f en utf-8\n"
-     tmp=$(iconv -c -f $char_set_f -t utf-8 <<< $tmp)
+      echo -e "::: Conversion de '$file' charcet $char_set_f en utf-8\n"
+      tmp=$(iconv -c -f $char_set_f -t utf-8 <<< $tmp)
    fi
 else
    echo
@@ -140,10 +141,14 @@ while read -r line ; do
    fi
    tot_long=$(( $tot_long + $long ))
 done <<< $tmp
-if [[ -z $num_li ]] ; then
-   num_li=0
+echo
+if [[ -n $num_li ]] ; then
+   echo -e "::: Sur $num_li ligne(s) $nb dépasse(nt) $max caractères"
+   echo -e "::: Longueur moyenne des lignes "$(( $tot_long / $num_li ))" caractères"
 fi
-echo -e "\n::: Sur $num_li ligne(s) $nb dépasse(nt) $max caractères"
-echo -e "::: Longueur moyenne des lignes "$(( $tot_long / $num_li ))" caractères"
 echo -e "::: Fin analyse fichier '$file'\n"
+
+if [[ -f longli_tmptmp ]] ; then
+   rm -f longli_tmptmp
+fi
 

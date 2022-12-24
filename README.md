@@ -1,4 +1,4 @@
-Présentation des fichiers de ce dépôt, le 20/12/2022.
+Présentation des fichiers de ce dépôt, le 24/12/2022.
  
 # mots #
 Ecrit en bash le logiciel **mots** version 6.51 b-20221021 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille.
@@ -73,7 +73,7 @@ Le script bash **clean** version 3.00 b-20221130 recherche les fichiers et répe
 
 # longli #
 
-Ecrit en bash, le script **longli** version 1.00 b-20221220 compte le nombre de caractères des lignes d'un fichier texte et affiche le début de celles qui dépassent une longueur définie en paramétre.
+Ecrit en bash, le script **longli** version 1.10 b-20221224 compte le nombre de caractères des lignes d'un fichier texte et affiche le début de celles qui dépassent une longueur définie en paramétre.
 
 *Aide : **longli** --help*
 
