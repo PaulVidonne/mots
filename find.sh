@@ -4,6 +4,7 @@
 # cp "$0" "$file"
 # date
 
+origine=find.sh
 version="1.04 b-20221224"
 
 if [[ $@ == *--help* ]] ; then
@@ -14,7 +15,7 @@ PRESENTATION GENERALE
    Usage   $(basename $0) [--help | --version] [OPTIONS]
 
    Objet  le script $(basename $0) version $version est une sur-couche de la commande 'find'
-          permettant de retouver des fichiers ou répertoires à partir de leurs dates, de
+          permettant de retrouver des fichiers ou répertoires à partir de leurs dates, de
           partie ou totalité de leur nom ou de leur contenu.
 
    Recherches
@@ -40,8 +41,8 @@ PRESENTATION GENERALE
               Changt : ctime  : changement des attributs
               Créé   : crtime : création du fichier, pas tjs documenté
 
-          les noms de fichiers ne peuvent contenir les caractères '\ / " < > $' et ne
-          peuvent être précédés du signe '-'.
+          les fichiers dont les noms comporteraient les caractères ' \ / " < > $ ne pourraient
+          être traités.
 
 OPTIONS
 
@@ -73,7 +74,7 @@ DIVERS
           sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>, texte
          intégral à  <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
 
-$(basename $0)                      version : $version                               ----
+$(basename $0)/$origin              version : $version                               ----
 EOF
 echo
 exit
