@@ -8,7 +8,7 @@ unset file
 set -f  # doit être présent AUSSI avant lancement de la commande pour éviter le globbing
 
 origin=longli
-version="1.10 b-20221224"
+version="1.20 b-20221226"
 
 if [[ $@ == *--version* ]] ; then
    echo -e "\n::: $(basename $0) version : $version\n"
@@ -110,7 +110,7 @@ else
    echo -e "::: Analyse du fichier '$file', max $max caractères."
 fi
 
-tmp=$( cat -n "$file" | sed 's/\\n/ n/g' | sed 's/\\c/ c/g' )
+tmp=$( cat -n "$file" | sed 's/\\n/ n/g' | sed 's/\\c/ c/g' | sed 's/\x0c//g' )
 if ! [[ $char_set_f == utf-8 ]] ; then
    if [[ $char_set_f == *unknown*  &&  -n $char_set ]] ; then
       echo -e "::: Conversion de '$file' charcet $char_set en utf-8\n"

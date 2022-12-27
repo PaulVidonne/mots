@@ -1,6 +1,7 @@
 #!/bin/bash
 
-version="6.51 b-20221021"
+origin=mots
+version="6.60 b-20221227"
 
 # pour debug
 # set -x
@@ -106,10 +107,14 @@ cat << EOF
              leur rang et leur fréquence dans l'ordre de leur fréquence.
 
       -x=XXX liste les XXX premières fréquences des mots du texte analysé. Maximum 999999. Par
-             défaut XXX=20. Toujours associé à une valeur de YY.
+             défaut XXX=20. Toujours associé à une valeur de YY. Nécessite -xa ou -xf.
 
       -y=YY  liste les fréquences des mots du texte analysé de plus de YY caractères. Par
              défaut YY=3. Minimum 1. Maximum 64. Toujours associé à une valeur de XXX.
+             Nécessite -xa ou -xf.
+
+      -z=ZZ  liste les fréquences des mots du texte analysé d'exactement ZZ caractères.
+             Minimum 1. Maximum 64. Toujours associé à une valeur de XXX. Nécessite -xa ou -xf.
 
       -i=FICHIER
              FICHIER est un fichier de vocabulaire qui contient les mots dont on recherche la
@@ -485,7 +490,7 @@ cat << EOF
              sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>, texte
              intégral à  <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
 
-$(basename $0)                                        $version                                  ----
+$(basename $0)/$origin                              $version                                  ----
 EOF
 echo
 exit
@@ -561,6 +566,7 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
    analyse_mots_detail=0
    bas_de_casse_i=0
    char_set=""
+   egalite=0
    lister_c_alpha=0
    lister_c_freq=0
    lister_f_alpha=0
@@ -577,6 +583,7 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
    option_monetaire=0
    option_pdf=0
    option_syllabeur=0
+   plus=" plus de"
    supp_chiffre_i=0
    verification=0
    xxx=20
@@ -655,10 +662,10 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
              exit
          fi
          xxx_yyy=1
-     elif [ ${arg:0:3} == "-y=" ]; then
+     elif [ ${arg:0:3} == "-y=" ] || [ ${arg:0:3} == "-z=" ]; then
          if [ ${arg:5:1} ] ; then
             usage
-            echo -e "::: L'expression -y= ne doit contenir que deux chiffres. Abandon\n"
+            echo -e "::: L'expression -y= ou -z= ne doit contenir que deux chiffres. Abandon\n"
             exit
          fi
          yyy=${arg:3:2}
@@ -667,14 +674,20 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
              echo -e "::: L'expression $yyy n'est pas un nombre. Abandon\n"
              exit
          elif [ $yyy -gt 64 ]; then
-             echo -e "\n::: L'expression -y=$yyy est ramenée à -y=64. On continue\n"
+             echo -e "\n::: L'expression -y=$yyy ou -z=$yyy est ramenée à -y=64 ou -z=64. On continue"
              yyy=64
          elif [ $yyy ==  0 ]; then
              usage
-             echo -e "::: L'expression -y=$yyy n'est pas possible. Abandon\n"
+             echo -e "::: L'expression -y=$yyy ou -z=$yyy n'est pas possible. Abandon\n"
              exit
          fi
          xxx_yyy=1
+         if [ ${arg:0:3} == "-z=" ]; then
+             egalite=1
+             plus=""
+         else
+             egalite=0
+         fi
       elif [ ${arg:0:3} == "-c=" ]; then
          char_set=${arg:3:20}
          iconv -l | grep -i -e "\b$char_set\b" >/dev/null
@@ -710,7 +723,7 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
       fi
       if [ $xxx_yyy == 1 ] && [ $lister_x_alpha == 0 ] && [ $lister_x_freq == 0 ] ; then
          usage
-         echo -e "::: Il faut accompagner -x=XXX ou -y=YY de -xa et/ou -xf. Abandon\n"
+         echo -e "::: Il faut accompagner -x=XXX, -y=YY ou -z=ZZ de -xa et/ou -xf. Abandon\n"
          exit
       fi
       if [[ $option_monetaire == "1"  &&  $supp_chiffre == "1" ]] ; then
@@ -880,7 +893,7 @@ if [ $fichier_sortie != /dev/null ] ; then
    else
      octets_sortie=$(wc -c < $fichier_sortie)
      l_octets_sortie=${#octets_sortie}
-     l_total=$(( octets_sortie + l_fichier_sortie + l_msg_final + l_octets_sortie + l_octets + 52 ))
+     l_total=$(( octets_sortie + l_fichier_sortie + l_msg_final + l_octets_sortie + l_octets + 53 ))
      taille=$(ls -l $fichier_sortie | awk -v N="$l_total" -F" " '{print N " octets - " $6 " " $7 " " $8}')
      echo -e "\n::: Fichier $fichier_sortie : créé ($taille)" | tee -a $fichier_sortie
   fi
@@ -916,10 +929,11 @@ supp_punct()
 # ---------
 supp_chiffre()
 {
+
    # donnees=$(sed 's/[0-9]//g' <<<$donnees)
    donnees=$(awk '{gsub("[0-9]", "")} ; Print $0' <<< $donnees)
 }
-# fin petite fct suppression---------fonction : syllabeur----------------------------------
+# fin petite fct suppression----------fonction : syllabeur----------------------------------
 syllabeur()
 {
     trap 'setterm -cursor on;
@@ -1250,7 +1264,8 @@ analyse_par_mots_detail()
          compt=$(awk -F ' ' -v value="$valeur" '{if($1 == value) {cpt+=1}} END {print cpt}' <<< "$sortie" )
          if [ $compt ] ; then
             let rang++
-            echo -e "$rang ::: $valeur => $compt" | tee -a $fichier_sortie
+            pourcent=$( echo "scale=2; $compt*100/$(($i + 1))" | bc -l )
+            echo -e "$rang ::: $valeur => $compt soit $pourcent %" | tee -a $fichier_sortie
          fi
       done
    fi
@@ -1412,12 +1427,7 @@ analyse_par_caracteres()
       echo -e "::: Rang;fréquence;caractère" | tee -a $fichier_sortie
       resultats=$(sort -t " " -k 4b,4 -k 2rn,2 <<< $resultats)
       resultats=$(sed -E -e '/Total.*$/d' <<< sed -E -e '/^ $/d' <<< $resultats)
-      if [ $option_csv == 0 ] ;then
-         awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "= " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
-      else
-         awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "= " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g'
-         echo "$resultats" | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' >> $fichier_sortie
-      fi
+      awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "soit " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
    fi
    if [ $lister_c_freq == 1 ] && [ $lister_liste == 1 ] ; then
       if [ $lister_c_alpha == 1 ] ; then echo ; fi | tee -a $fichier_sortie
@@ -1426,12 +1436,7 @@ analyse_par_caracteres()
       echo -e "::: Rang;fréquence;caractère" | tee -a $fichier_sortie
       resultats=$(sort -t " " -k 2rn,2 -k 4b,4 <<< $resultats)
       resultats=$(sed -E -e '/Total.*$/d' <<< sed -E -e '/^ $/d' <<< $resultats)
-      if [ $option_csv == 0 ] ;then
-         awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "= " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
-      else
-         awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "= " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g'
-         echo "$resultats" | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' >> $fichier_sortie
-      fi
+      awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "soit " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
    fi
    echo -e "\n::: Analyse des caractères :::" | tee -a $fichier_sortie
    echo -e "$donnees_source$ligne_cmd_ori " | tee -a $fichier_sortie
@@ -1574,9 +1579,13 @@ analyse_par_mots_frequence()
 
       if [ $lister_x_alpha == "1" ] || [ $lister_x_freq == "1" ] ; then
          # on traite ensuite le cas de sortie -x=
-         echo -e "\n::: Mots du texte analysé de plus de $yyy lettre(s) de plus grande fréquence ($xxx demandés) :::" | tee -a $fichier_sortie
          variable_temp=$(echo "$variable_temp" | sed -E -e '/::: Total : .*$/d' | sed -E -e '/^ $/d')
-         variable_temp=$(awk -v yyy_awk=$yyy '{if (length($4) > yyy_awk) print $0 }' <<< $variable_temp)
+         echo -e "\n::: Mots du texte analysé de$plus $yyy lettre(s) de plus grande fréquence ($xxx demandés) :::" | tee -a $fichier_sortie
+         if [ $egalite -eq 0 ] ; then
+            variable_temp=$(awk -v yyy_awk=$yyy '{if (length($4) > yyy_awk) print $0 }' <<< $variable_temp)
+         else
+            variable_temp=$(awk -v yyy_awk=$yyy '{if (length($4) == yyy_awk) print $0 }' <<< $variable_temp)
+         fi
          variable_temp_alpha=$(echo "$variable_temp" | sort -t" " -k 2rn,2 -k 4b,4 | sed -n '1, '$xxx' p'| sort -t" " -k 4b,4 -k 2rn,2 )
          variable_temp_freq=$(echo "$variable_temp" | sort -t" " -k 2rn,2 -k 4b,4 | sed -n '1, '$xxx' p')
          nb_mots_xx=$(echo "$variable_temp_alpha" | wc -l)
@@ -1601,7 +1610,7 @@ analyse_par_mots_frequence()
       fi # option lister x freq
 
       if [ $lister_x_alpha == "1" ] || [ $lister_x_freq == "1" ] ; then
-         deplus="de plus de $yyy lettres "
+         deplus="de$plus $yyy lettres "
          affichage_frequence
       fi
       unset variable_temp variable_temp_alpha variable_temp_freq variable_boucle
@@ -1699,6 +1708,13 @@ mots2csv()
    donnees=$(sed -E -e 's/(^::: )(.*)/\2/g' <<< cat $fichier_sortie)
    donnees=$(sed -E -e 's/ ::: /;/g' <<< $donnees)
    donnees=$(sed -E -e 's/(.*)( => )(.*)/\1;"\3\"/g' <<< $donnees)
+   if [ $analyse_chars -eq 1 ] ; then
+      donnees=$(sed -E -e 's/(^[0-9]*;[0-9]*;)"(.?) soit [0-9.]*| %"/\1"\2/g' <<< $donnees)
+   fi
+   if [ $analyse_mots_detail -eq 1 ] ; then
+      donnees=$(sed -E -e 's/(^[0-9]*;[0-9]*;)"([0-9]*) soit [0-9.]*|%"/\1\2/g' <<< $donnees)
+   fi
+   donnees=$(sed -E -e 's/(^[0-9]*;[0-9]*;)"([0-9]*)"$/\1\2/g' <<< $donnees)
    donnees=$(sed -E -e '/^[0-9]|^Rang|^Fr.quence|^Taille|^R.partition|^Nombre/!d' <<< $donnees)
    donnees=$(sed -E -e '/^Fr.quence|^Taille|^R.partition|^Nombre/{x;p;x}' <<< $donnees)
    donnees=$(sed -E -e 's/^Fr.quence .*|^Taille .*|^R.partition .*|^Nombre .*/&;;/g' <<< $donnees)
