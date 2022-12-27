@@ -6,8 +6,8 @@ version="6.60 b-20221227"
 # pour debug
 # set -x
 # date
-file="tmp$(date +%m%d-%H%M%S)"
-cp "$0" "$file"
+# file="tmp$(date +%m%d-%H%M%S)"
+# cp "$0" "$file"
 # rm -f encours_va*.log
 # source mots_variables
 # affiche_var ${LINENO} 0
