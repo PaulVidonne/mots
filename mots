@@ -6,8 +6,8 @@ version="6.60 b-20221227"
 # pour debug
 # set -x
 # date
-# file="tmp$(date +%m%d-%H%M%S)"
-# cp "$0" "$file"
+file="tmp$(date +%m%d-%H%M%S)"
+cp "$0" "$file"
 # rm -f encours_va*.log
 # source mots_variables
 # affiche_var ${LINENO} 0
@@ -662,10 +662,16 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
              exit
          fi
          xxx_yyy=1
-     elif [ ${arg:0:3} == "-y=" ] || [ ${arg:0:3} == "-z=" ]; then
+     elif [ ${arg:0:3} == "-y=" ] ; then
+         superieur=1
+         if [[ $superieur -eq 1 && $egalite -eq 1 ]] ; then
+            usage
+            echo -e "::: Les option -y= et -z= sont incompatibles. Abandon\n"
+            exit
+         fi
          if [ ${arg:5:1} ] ; then
             usage
-            echo -e "::: L'expression -y= ou -z= ne doit contenir que deux chiffres. Abandon\n"
+            echo -e "::: L'expression -y= ne doit contenir que deux chiffres. Abandon\n"
             exit
          fi
          yyy=${arg:3:2}
@@ -674,20 +680,42 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
              echo -e "::: L'expression $yyy n'est pas un nombre. Abandon\n"
              exit
          elif [ $yyy -gt 64 ]; then
-             echo -e "\n::: L'expression -y=$yyy ou -z=$yyy est ramenée à -y=64 ou -z=64. On continue"
+             echo -e "\n::: L'expression -y=$yyy est ramenée à -y=64. On continue"
              yyy=64
          elif [ $yyy ==  0 ]; then
              usage
-             echo -e "::: L'expression -y=$yyy ou -z=$yyy n'est pas possible. Abandon\n"
+             echo -e "::: L'expression -y=$yyy n'est pas possible. Abandon\n"
              exit
          fi
          xxx_yyy=1
-         if [ ${arg:0:3} == "-z=" ]; then
-             egalite=1
-             plus=""
-         else
-             egalite=0
+         superieur=1
+     elif [ ${arg:0:3} == "-z=" ] ; then
+         egalite=1
+         if [[ $superieur -eq 1 && $egalite -eq 1 ]] ; then
+            usage
+            echo -e "::: Les option -y= et -z= sont incompatibles. Abandon\n"
+            exit
          fi
+         if [ ${arg:5:1} ] ; then
+            usage
+            echo -e "::: L'expression -z= ne doit contenir que deux chiffres. Abandon\n"
+            exit
+         fi
+         yyy=${arg:3:2}
+         if ! [[ $yyy == +([0-9]) ]] ; then
+             usage
+             echo -e "::: L'expression $yyy n'est pas un nombre. Abandon\n"
+             exit
+         elif [ $yyy -gt 64 ]; then
+             echo -e "\n::: L'expression -z=$yyy est ramenée à -y=64 ou -z=64. On continue"
+             yyy=64
+         elif [ $yyy ==  0 ]; then
+             usage
+             echo -e "::: L'expression -z=$yyy n'est pas possible. Abandon\n"
+             exit
+         fi
+         xxx_yyy=1
+         plus=""
       elif [ ${arg:0:3} == "-c=" ]; then
          char_set=${arg:3:20}
          iconv -l | grep -i -e "\b$char_set\b" >/dev/null
@@ -704,7 +732,7 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
            echo -e "::: Le charset \"$char_set_i\" n'est pas reconnu. Abandon\n"
            exit
          fi
-       else
+      else
          usage
          echo -e "::: La ligne de commande '$0 $ligne_cmd_ori' comprend des options non reconnues. Abandon\n"
          exit
