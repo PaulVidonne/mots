@@ -1736,13 +1736,7 @@ mots2csv()
    donnees=$(sed -E -e 's/(^::: )(.*)/\2/g' <<< cat $fichier_sortie)
    donnees=$(sed -E -e 's/ ::: /;/g' <<< $donnees)
    donnees=$(sed -E -e 's/(.*)( => )(.*)/\1;"\3\"/g' <<< $donnees)
-   if [ $analyse_chars -eq 1 ] ; then
-      donnees=$(sed -E -e 's/(^[0-9]*;[0-9]*;)"(.?) soit [0-9.]*| %"/\1"\2/g' <<< $donnees)
-   fi
-   if [ $analyse_mots_detail -eq 1 ] ; then
-      donnees=$(sed -E -e 's/(^[0-9]*;[0-9]*;)"([0-9]*) soit [0-9.]*|%"/\1\2/g' <<< $donnees)
-   fi
-   donnees=$(sed -E -e 's/(^[0-9]*;[0-9]*;)"([0-9]*)"$/\1\2/g' <<< $donnees)
+   donnees=$(sed -E -e 's/(^[0-9]*;[0-9]*;)"(.?|[0-9]*) soit [0-9.]*| %"/\1"\2/g' <<< $donnees)
    donnees=$(sed -E -e '/^[0-9]|^Rang|^Fr.quence|^Taille|^R.partition|^Nombre/!d' <<< $donnees)
    donnees=$(sed -E -e '/^Fr.quence|^Taille|^R.partition|^Nombre/{x;p;x}' <<< $donnees)
    donnees=$(sed -E -e 's/^Fr.quence .*|^Taille .*|^R.partition .*|^Nombre .*/&;;/g' <<< $donnees)
