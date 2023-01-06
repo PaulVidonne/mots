@@ -1,7 +1,7 @@
 #!/bin/bash
 
 origin=mots
-version="6.61 b-20230105"
+version="6.61 b-20230106"
 
 # pour debug
 # set -x
@@ -565,6 +565,7 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
    analyse_frequence=0
    analyse_mots_detail=0
    bas_de_casse_i=0
+   car_in_mots=0
    char_set=""
    egalite=0
    lister_c_alpha=0
@@ -1254,6 +1255,9 @@ analyse_par_mots_commun()
       if [ "$option_syllabeur" == "1" ] && ! [ "$syllabeur_fait" == "1" ] ;then
          syllabeur
          syllabeur_fait=1
+         if [ $nb_syllabes == 0 ] ; then
+            option_syllabeur=0
+         fi
       fi
    fi
 }
@@ -1308,7 +1312,11 @@ analyse_par_mots_detail()
       autres=$(($nb_total_punct - $nb_punct_dans_mots))
       moy_phrase=$(echo "scale=5; $nb_mots/$nb_total_phrases" | bc -l)
       complexite=$(echo "scale=5; ($moy_car - 4.2 + 7*l($moy_phrase) - 8)/1.2" | bc -l)
-      coleman=$(echo "scale=5; (5.88*$moy_car - 0.296*(100/$moy_phrase) - 15.8)" | bc -l)
+      if ! [ $moy_phrase == 0 ] ; then
+         coleman=$(echo "scale=5; (5.88*$moy_car - 0.296*(100/$moy_phrase) - 15.8)" | bc -l)
+     else
+         coleman=0
+    fi
       ari=$(echo "scale=5; (4.71*$moy_car + 0.5*$moy_phrase - 21.43)" | bc -l)
       # après calcul on limite le nb de décimales, mais printf depend de la locale séparateur
       # et LANG=C ou LC_NUMERIC=C ne marchent pas sur toutes les distributions
