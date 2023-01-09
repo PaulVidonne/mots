@@ -37,7 +37,7 @@ PRESENTATION GENERALE
           le jour de Pâques de l'année.
 
 SYNTAXE
-          les dates calendaires peuvent être saisies sous la forme 'JJ-MM-AAAA' ou 'JJ/MM/AAA'
+          les dates calendaires peuvent être saisies sous la forme 'JJ-MM-AAAA' ou 'JJ/MM/AAAA'
           et les numéros de jours juliens "XXXXXXXXX" avec ou sans espaces. Les années
           antérieures à l'an 1 sont désignées par le signe "-" après l'année, de type :
           'JJ/MM/AAAA-'.
