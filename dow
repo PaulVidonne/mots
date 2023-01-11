@@ -10,11 +10,12 @@
 # cal --reform=gregorian est entièrement grégorien
 # Calcul de la date de pâques méthode Butcher-Meeus (grégorienne) Delambre (julienne)
 
-version="1.12 b-20221204"
+version="1.20 b-20230111"
+origin=dow
 
 usage()
 {
-   echo -e "::: Usage : $(basename $0) [--help | --version] date_calendaire | jour_julien [OPTIONS]"
+   echo -e "::: Usage : $(basename $0) [--help | --version] [date | jour_julien] [OPTIONS]"
 }
 
 echo
@@ -28,13 +29,14 @@ if [[ $@ == *--help* ]] ; then
 cat << EOF
 PRESENTATION GENERALE
 
-   Usage  $(basename $0) [--help | --version] date_calendaire | jour_julien [OPTIONS]
+   Usage  $(basename $0) [--help | --version] [date | jour_julien] [OPTIONS]
 
    Objet  le script $(basename $0) version $version établit la correspondance entre les dates
           du calendrier grégorien, celles du calendrier julien et celles de leurs numéros en
           "jours juliens" inventés par Joseph Juste Scaliger. La saisie de l'une de ces trois
-          données affiche les deux autres ainsi que le jour de la semaine. Une option affiche
-          le jour de Pâques de l'année.
+          données affiche les deux autres ainsi que le jour de la semaine. Par défaut de saisie
+          de date ou de jour julien, la date retenue est celle du jour. Une option affiche le
+          jour de Pâques de l'année.
 
 SYNTAXE
           les dates calendaires peuvent être saisies sous la forme 'JJ-MM-AAAA' ou 'JJ/MM/AAAA'
@@ -84,7 +86,7 @@ DIVERS
           sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>, texte
           intégral à  <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
 
-$(basename $0)                      version : $version                               ----
+$(basename $0)/$origin                  version : $version                               ----
 EOF
 echo
 exit
@@ -106,16 +108,9 @@ tab_mois_fr=( [1]="janvier" [2]="février" [3]="mars" [4]="avril" [5]="mai" [6]=
 #--------------------------------------fonction entree----------------------------------------
 function entree()
 {
-if [ $# -lt 1 ] ; then
-   usage
-   echo -e "::: Ligne de commande '$(basename $0)' vide. Abandon.\n"
-   exit
-fi
-
 # on teste si la ligne cmd contient un jdn
 jdn=$( sed -E -e 's/\ |-en|-j|-p//g' <<< $@ )
-# alternative : re='^-?[0-9]*$' et if [[ $jdn =~ $re ]] ; then
-if [[ $jdn =~ ^-?[0-9]*$ ]] ; then
+if ! [[ -z $jdn ]] && [[ $jdn =~ ^-?[0-9]*$ ]] ; then
    if ([ $jdn -gt 5373557 ] || [ $jdn -lt 0 ]) ; then
       usage
       echo -e "::: Jour julien '$jdn' hors plage admise (0-5373557). Abandon\n"
@@ -130,8 +125,11 @@ else
       echo -E -e "::: Contenu non reconnu dans la ligne de commande '$(basename $0) $@'. Abandon.\n"
       exit
    fi
-   # on teste la validité de la forme date
+   # on teste l'exixtence et la validité de la forme date
    jour=$(sed -E 's/ *-(j|en|p) *//g' <<< $@ )
+   if [[ -z $jour ]] ; then
+      jour=$(date "+%d/%m/%Y")
+   fi
    if ! ( [[ $jour =~ ^[0-9]{2}[/-][0-9]{2}[/-][0-9]{4}[-]?$ ]] ) ; then
       usage
       echo -e "::: Argument '$jour' invalide. Le format des dates est 'JJ/MM/AAAA[-]'."

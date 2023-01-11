@@ -1,4 +1,4 @@
-Présentation des fichiers de ce dépôt, à jour le 09/01/2023.
+Présentation des fichiers de ce dépôt, à jour le 11/01/2023.
  
 # mots #
 Ecrit en bash le logiciel **mots** version 6.62 b-20230109 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille.
@@ -61,7 +61,7 @@ Ecrit en bash, le script **litteral** version 2.30 b-20221217 transcrit en lettr
 
 # dow #
 
-Le script bash **dow** version 1.12 b-20221204 établit la correspondance entre les dates du calendrier grégorien, celles du calendrier julien et celles de leurs numéros en "jours juliens" inventés par Joseph Juste Scaliger. La saisie de l'une de ces trois données affiche les deux autres ainsi que le jour de la semaine. Une option affiche le jour de Pâques de l'année.
+Le script bash **dow** version 1.20 b-20230111 établit la correspondance entre les dates du calendrier grégorien, celles du calendrier julien et celles de leurs numéros en "jours juliens" inventés par Joseph Juste Scaliger. La saisie de l'une de ces trois données affiche les deux autres ainsi que le jour de la semaine. Une option affiche le jour de Pâques de l'année.
 
 *Aide détaillée : **dow** --help*
 
