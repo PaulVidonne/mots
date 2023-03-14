@@ -1,0 +1,136 @@
+#!/bin/bash
+
+# file="tmp$(date +%m%d-%H%M%S)"
+# cp "$0" "$file"
+# date
+version="1.00 b-20230302"
+origin=iban
+usage()
+{
+   echo -e "\n::: Usage : $(basename $0) [--help | --version] [OPTIONS]"
+}
+if [[ $@ == *--version* ]] ; then
+   echo -e "\n::: $(basename $0) version : $version\n"
+   exit
+fi
+
+if [[ $@ == *--help* ]] ; then
+cat << EOF
+
+PRESENTATION GENERALE
+
+   Usage  $(basename $0) [--help | --version] [OPTIONS]
+
+   Objet  le script $(basename $0) version $version calcule le RIB et l'IBAN d'un
+          compte bancaire français à partir des numéros de la banque, du guichet
+          et du compte. Le résultat peut être envoyé dans un fichier.
+
+OPTION
+
+   -p     le résultat est envoyé dans un fichier intitulé "iban.txt" avec vidage
+          de ce fichier s'il existe déjà.
+
+   -q     le résultat est ajouté à un fichier intitulé "iban.txt".
+
+DIVERS
+
+   exécutabilité
+          ce script a été réalisé sous GNU bash, version 5.2.9(1)-release-(x86_64-
+          redhat-linux-gnu). Il ne demande la présence d'aucun module particulier.
+
+   bugs   merci de signaler bugs et suggestions à : paul at vidonne point fr
+
+   licence
+          Copyright (c) 2022 Paul Vidonne. Ce script peut être librement exécuté,
+          diffusé et modifié dans les conditions de la 'Creative Commons Attribution-
+          NonCommercial-ShareAlike 3.0 Unported License' (CC-BY-NC-SA) publiée par
+          Creative Commons. Il est mis à disposition "tel quel", SANS AUCUNE GARANTIE
+          de quelque nature que ce soit et auprès de qui que ce soit. Plus d'informations
+          (en anglais) sur la licence à <https://creativecommons.org/licenses/by-nc-sa/3.0/>,
+          texte intégral à <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
+
+$(basename $0)/$origin                  version : $version                               ----
+EOF
+echo
+exit
+fi
+echo -e "\n::: Calcul des RIB et IBAN des comptes bancaires français"
+echo -e "::: Code banque et code guichet : 5 chiffres chacun"
+echo -e "::: Numéro de compte : 11 caractères alphanumériques"
+
+cod_pays="FR"
+echo -e "\n::: code pays        : FR"
+read -p "::: titulaire        : " titulaire
+read -p "::: code banque      : " cod_bqe
+if ! ([[ $cod_bqe =~ ^[0-9]+$ ]] && [[ ${#cod_bqe} -eq 5 ]]) ; then
+  usage
+  echo -e "::: Le code banque '$cod_bqe' est incorrect. Abandon.\n"
+  exit
+fi
+read -p "::: code guichet     : " cod_gui
+if ! ([[ $cod_gui =~ ^[0-9]+$ ]] && [[ ${#cod_gui} -eq 5 ]]) ; then
+  usage
+  echo -e "::: Le code guichet '$cod_gui' est incorrect. Abandon.\n"
+  exit
+fi
+read -p "::: numéro de compte : " num_cpt
+num_cpt=$(echo $num_cpt | tr '[:lower:]' '[:upper:]')
+if ! ([[ $num_cpt =~ ^[0-9A-Z]+$ ]] && [[ ${#num_cpt} -eq 11 ]]) ; then
+  usage
+  echo -e "::: Le numéro de compte '$num_cpt' est incorrect. Abandon.\n"
+  exit
+fi
+
+# calcul de la clé RIB
+declare -A tab=( [0]=0 [1]=1 [2]=2 [3]=3 [4]=4 [5]=5 [6]=6 [7]=7 [8]=8 [9]=9 \
+                 [A]=1 [B]=2 [C]=3 [D]=4 [E]=5 [F]=6 [G]=7 [H]=8 [I]=9 \
+                 [J]=1 [K]=2 [L]=3 [M]=4 [N]=5 [O]=6 [P]=7 [Q]=8 [R]=9 \
+                       [S]=2 [T]=3 [U]=4 [V]=5 [W]=6 [X]=7 [Y]=8 [Z]=9 )
+new_cpt=$(echo $num_cpt | sed 's/./& /g')
+for i in $new_cpt ; do
+    new_cpt1=$new_cpt1${tab[$i]}
+    done
+new_bqe=$(echo $cod_bqe | bc)
+new_gui=$(echo $cod_gui | bc)
+new_cpt=$(echo $new_cpt1 | bc)
+valeur=$((new_bqe*89 + new_gui*15 + new_cpt*3))
+cle_rib=$((97 - $(expr $valeur % 97)))
+if [ ${#cle_rib} -eq 1 ] ; then
+   cle_rib="0"$cle_rib
+fi
+
+# calcul de la cle IBAN
+bban=$cod_bqe$cod_gui$num_cpt$cle_rib
+valeur=$bban$cod_pays"00"
+valeur=$(echo $valeur | sed 's/./& /g')
+declare -A tab=( [0]=0 [1]=1 [2]=2 [3]=3 [4]=4 [5]=5 [6]=6 [7]=7 [8]=8 [9]=9 \
+                 [A]=10 [B]=11 [C]=12 [D]=13 [E]=14 [F]=15 [G]=16 [H]=17 [I]=18 \
+                 [J]=19 [K]=20 [L]=21 [M]=22 [N]=23 [O]=24 [P]=25 [Q]=2 [R]=27 \
+                 [S]=28 [T]=29 [U]=30 [V]=31 [W]=32 [X]=33 [Y]=34 [Z]=35 )
+for i in $valeur ; do
+    new_val=$new_val${tab[$i]}
+    done
+cle_iban=$((98 - $(expr $new_val % 97)))
+iban=$cod_pays$cle_iban" "$(echo $bban | sed 's/.\{4\}/& /g')
+if [[ $@ == *-p* || $@ == *-q* ]] ; then
+   fichier_sortie="iban.txt"
+else
+   fichier_sortie="/dev/null"
+fi
+if [[ $@ == *-p* ]] ; then
+   $(> iban.txt)
+fi
+echo -e "\n------------------------------------------------------------------------------------- " >> $fichier_sortie
+echo -e "::: Date : $(date)"  >> $fichier_sortie
+echo -e "::: Commande : $(basename $0) $@" | tee -a $fichier_sortie
+# affichage résultat
+echo -e "\n::: Titulaire ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " | tee  -a $fichier_sortie
+echo -e "::: "$titulaire | tee -a $fichier_sortie
+echo -e "::: RIB ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " | tee -a $fichier_sortie
+echo -e "::: Code banque : $cod_bqe Code guichet : $cod_gui Numéro compte : $num_cpt Clé RIB : $cle_rib" | tee -a $fichier_sortie
+echo -e "::: IBAN :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " | tee -a $fichier_sortie
+echo -e "::: "$iban | tee -a $fichier_sortie
+echo -e ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" | tee -a $fichier_sortie
+if [[ $@ == *-p* || $@ == *-q* ]] ; then
+    echo -e "::: Les résultats ci-dessus figurent dans le fichier : $(pwd)/iban.txt\n"
+fi
