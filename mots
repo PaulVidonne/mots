@@ -1,7 +1,7 @@
 #!/bin/bash
 
 origin=mots
-version="6.63 b-20230207"
+version="7.00 b-20230314"
 
 # pour debug
 # set -x
@@ -80,6 +80,10 @@ cat << EOF
              mots par nombre de syllabes et ajoute les quatre indices de lisibilité de Flesh-
              Kincaid général, Flesh-Kincaid éducation, Gunning-Fog et SMOG. L'usage de
              l'option -s0 est suggéré.
+
+   ANALYSE DES PHRASES
+      -ph   liste les phrases avec leur longueur individuelle et leur rang dans l'ordre du
+            texte et donne la répartition des phrases selon leur taille en nombre de mots.
 
    FREQUENCE DES CARACTERES
              les deux options ci-après établissent la fréquence des caractères du texte
@@ -364,16 +368,15 @@ cat << EOF
 
       réserves générales
              le présent script est destiné à l'examen de fichiers textes en vue d'en
-             quantifier les composants principaux que sont les mots, leur décomposition en
-             syllabes, et les caractères. Il comporte des choix, qui peuvent être discutés. Il
-             n'a nulle prétention à l'exhaustivité : son usage se limite aux alphabets des
-             langues latines et aux textes plutôt littéraires. Il est moins opérant pour les
-             textes comportant des signes propres à une discipline particulière. La plus
-             grande liberté est laissée à l'usager, qui peut notamment cumuler tous les choix
-             d'options. Ces options peuvent être données dans n'importe quel ordre, mais
-             l'ordre d'exécution des commandes n'est pas déterminé par l'ordre des arguments.
-             Si l'option --version est présente, elle l'emporte sur toutes les autres et sera la
-             seule à être exécutée. Il est va de même pour l'option --help.
+             quantifier les phrases, les mots, les syllabes et les caractères. Il comporte des
+             choix, qui peuvent être discutés. Il n'a nulle prétention à l'exhaustivité : son
+             usage se limite aux alphabets des langues latines et aux textes plutôt littéraires.
+             Il est moins opérant pour les textes comportant des signes propres à une discipline
+             particulière. La plus grande liberté est laissée à l'usager, qui peut notamment
+             cumuler tous les choix d'options. Ces options peuvent être données dans n'importe
+             quel ordre, mais l'ordre d'exécution des commandes n'est pas déterminé par l'ordre
+             des arguments. Si l'une des options --version ou --help est présente, elle
+             l'emporte sur toutes les autres et sera seule à être exécutée.
 
       option -s
              la mise en oeuvre de cette option entraîne des temps de traitement qui peuvent
@@ -425,6 +428,13 @@ cat << EOF
              Dans la répartition des mots par nombre de lettres, les mots de plus de 124
              caractères ne sont pas affichés.
 
+             Il résulte de la définition des phrases que les titres, en principe non suivis
+             d'un point, ne sont pas considérés comme des phrases et sont rattachés au début
+             de la phrase suivante.
+
+             Le dénombrement des phrases peut différer de quelques unités entre le module
+             d'analyse des phrases et les autres modules. La différence est insignifiante.
+
              L'ordre alphabétique diffère en fonction de la définition de la langue par la
              'locale' qui ne peut être modifiée sur certains systèmes. Il en résulte des
              résultats qui peuvent varier de l'un à l'autre. La meilleure correspondance entre
@@ -473,8 +483,8 @@ cat << EOF
              mais ce temps augmente rapidement avec le volume des données à analyser.
 
       exécutabilité
-             ce script a été réalisé sous GNU bash, version 5.1.0(1)-release-(x86_64-redhat-
-             linux-gnu), GNU sed version 4.8, GNU awk version 5.1.0. Il peut demander
+             ce script a été réalisé sous GNU bash, version 5.2.15(1)-release-(x86_64-redhat-
+             linux-gnu), GNU sed version 4.8, GNU awk version 5.1.1, API: 3.1. Il peut demander
              l'installation de certains modules (notamment 'file' 'iconv' 'bc' 'tput' ainsi
              que 'enscript' ou 'ps2pdfwr' pour l'édition des pdf), modules en principe
              disponibles dans toutes les distributions de Linux.
@@ -564,6 +574,7 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
    analyse_chars=0
    analyse_frequence=0
    analyse_mots_detail=0
+   analyse_phrases=0
    bas_de_casse_i=0
    car_in_mots=0
    char_set=""
@@ -633,6 +644,8 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
          supp_punct=1
       elif [ $i == "-s0" ]; then
          supp_chiffre=1
+      elif [ $i == "-ph" ]; then
+         analyse_phrases=1
       elif [ $i == "-isc" ]; then
          bas_de_casse_i=1
       elif [ $i == "-isd" ]; then
@@ -789,6 +802,11 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
             exit
          fi
       fi
+      if [[ $analyse_phrases == "1"  &&  $supp_punct == "1" ]] ; then
+          usage
+          echo -e "::: L'analyse par phrases exige la présence de la ponctuation. Abandon\n"
+          exit
+      fi
       # etablissement de l'analyse par defaut
       if [ "$analyse_mots_detail" != "1" ] && [ "$analyse_chars" != "1" ] && [ "$analyse_frequence" != "1" ];then
         analyse_mots_detail=1
@@ -878,7 +896,7 @@ fi
 # \xef\xbf\xbd = caractère de remplacement
 # (\x08 \b BS) - (\x09 \t HT) - (\x0a \n LF) - (\x0b \v VT)
 # (\x0c \f FF) - (\x0d \r CR) - (\c supprime le \n)
-# fin rappels -----------------------fonction : préliminaire---------------------------------
+# fin rappels ------------------------fonction : préliminaire--------------------------------
 preliminaire()
 {
    pleines=$(grep -v -c -E "^[[:space:]]*$" <<< "$donnees_brutes")
@@ -889,7 +907,7 @@ preliminaire()
       echo -e "\n::: Les données sont organisées en texte" | tee -a $fichier_sortie
    fi
 }
-# fin préliminaire-------------------fonction : postliminaire-------------------------------
+# fin préliminaire--------------------fonction : postliminaire-------------------------------
 postliminaire()
 {
    msg_final="::: Temps d'exécution : $(($SECONDS/3600)) heure(s), $(($SECONDS%3600/60)) minute(s) et $(($SECONDS%60)) seconde(s)"
@@ -932,7 +950,7 @@ if [ "$option_pdf" == "1" ] ; then
    mots2pdf "$@"
 fi
 }
-# fin postliminaire -----------------fonction : petites fct suppression---------------------
+# fin postliminaire ------------------fonction : petites fct suppression---------------------
   accent_capit="ÀÁÂĀÃÄÅĄÆÇČĎÐÈÉÊËĚÌÍÎĪÏÍŁÑŇÒÓÔŌÕÖØŒŘŠŞŤŢÙÚÛÜŮÝŸŶŽÞßẞ"
   accent_bdcas="àáâāãäåąæçčďđèéêëěìíîïīíłñňòóôōõöøœřšşťţùúûüůýÿŷžþßß"
    accent_tous="àáâāãäåąçčďđèéêëěìíîïīíłñňòóôōõöřšşťţùúûüůýÿŷžÀÁÂĀÃÄÅĄÇČĎÐÈÉÊËĚÌÍÎĪÏÍŁÑŇÒÓÔŌÕÖŘŠŞŤŢÙÚÛÜŮÝŸŶŽ"
@@ -962,7 +980,7 @@ supp_chiffre()
    # donnees=$(sed 's/[0-9]//g' <<<$donnees)
    donnees=$(awk '{gsub("[0-9]", "")} ; Print $0' <<< $donnees)
 }
-# fin petite fct suppression----------fonction : syllabeur----------------------------------
+# fin petite fct suppression----------fonction : syllabeur-----------------------------------
 syllabeur()
 {
     trap 'setterm -cursor on;
@@ -1133,12 +1151,21 @@ operations_monetaires()
 filtrer()
 {
 donnees_int=$1
-   # suppression des points sauf dans les nombres et les mots
-   donnees_int=$(gawk '{ print gensub(/(^|[^[a-zA-Z0-9])\.+([^a-z]|$)/, "\\1 \\2", "g", $0) }' <<< $donnees_int)
+   if [ "$2" == "1" ] ; then
+      # suppression des points sauf dans les nombres, les mots ou suivi d'espace
+      donnees_int=$(gawk '{ print gensub(/(^|[^[accent_tousA-Za-z])\.+(^[accent_tousA-Za-z]|\. |$)/, "\\2", "g", $0) }' <<< $donnees_int)
+      # suppression des virgules qui subsistent en fin de mot et de ligne
+      donnees_int=$(gawk '{ print gensub(/(,+)([\x20\x0a\x0d\x0a]|$)+/, " ", "g", $0) }' <<< $donnees_int)
+      # suppression des point d'exclamation et interrogation sauf suivis espace
+      donnees_int=$(gawk '{ print gensub(/(\?+|!+)([^ ]+)/, "\\2", "g", $0) }' <<< $donnees_int)
+   else
+      # suppression des points sauf dans les nombres et les mots
+      donnees_int=$(gawk '{ print gensub(/(^|[^[a-zA-Z0-9])\.+([^a-z]|$)/, "\\1 \\2", "g", $0) }' <<< $donnees_int)
+      # suppression des points et virgules qui subsistent en fin de mot et de ligne
+      donnees_int=$(gawk '{ print gensub(/(\.+|,+)([\x20\x0a\x0d\x0a]|$)+/, " ", "g", $0) }' <<< $donnees_int)
+   fi
    # suppression des virgules sauf dans les nombres (US style)
    donnees_int=$(gawk '{ print gensub(/(^|[^0-9]),+([^0-9]|$)/, "\\1 \\2", "g", $0) }' <<< $donnees_int)
-   # suppression des points et virgules qui subsistent en fin de mot et de ligne
-   donnees_int=$(gawk '{ print gensub(/(\.+|,+)([\x20\x0a\x0d\x0a]|$)+/, " ", "g", $0) }' <<< $donnees_int)
    # suppression des degrés sauf dans les nombres
    donnees_int=$(gawk '{ print gensub(/(^|[^0-9])°+([^0-9]|$)/, "\\1 \\2", "g", $0) }' <<< $donnees_int)
    # Suppression des slashs =sauf dans les nombres et les mots=
@@ -1154,7 +1181,11 @@ donnees_int=$1
    # Suppression des glypes monétaires isolés
    donnees_int=$(gawk '{ print gensub(/([^0-9] )[$£€¥]+( |$)/, "\\1\\2", "g", $0) }' <<< $donnees_int)
    # Reste des autres suppressions
-   donnees_int=$(gawk '{ print gensub(/\xe2\x80\x99{2,}|ʾ| \xe2\x80\x99|\xe2\x80\x99 |“|”|<|=|>|;|:|\(|\)|\[|\]|\{|\}|!|\?|"| -|- |-{2,}|@|#|\*/, " ", "g", $0) }' <<< $donnees_int)
+   if [ "$2" == "1" ] ; then
+      donnees_int=$(gawk '{ print gensub(/\xe2\x80\x99{2,}|ʾ| \xe2\x80\x99|\xe2\x80\x99 |“|”|<|=|>|;|:|\(|\)|\[|\]|\{|\}|"| -|- |-{2,}|@|#|\*/, " ", "g", $0) }' <<< $donnees_int)
+   else
+      donnees_int=$(gawk '{ print gensub(/\xe2\x80\x99{2,}|ʾ| \xe2\x80\x99|\xe2\x80\x99 |“|”|<|=|>|;|:|\(|\)|\[|\]|\{|\}|!|\?|"| -|- |-{2,}|@|#|\*/, " ", "g", $0) }' <<< $donnees_int)
+   fi
    donnees_int=$(gawk '{ print gensub(/ _|_ |_{2,}|\||§|&|~|\^|`|µ|\+|\xe2\x80\x93|−|«|»|½|¼|÷|×|¡|¿|…|·|²|³|®|±|\\´|º|©|¨|¾|¹|¸|ª|¦|¶|¤|¢|•|—/, " ", "g", $0) }' <<< $donnees_int)
    # suppression apostrophe x27 sauf dans les mots
    donnees_int=$(gawk '{ print gensub(/([[:space:]][\x27]|[[:punct:]][\x27]|[\x27][[:space:]]|[\x27][[:punct:]])/, " ", "g", $0) }' <<<$donnees_int)
@@ -1178,6 +1209,11 @@ analyse_par_mots_commun()
       type="liste"
       if [ $option_syllabeur == 1 ] ; then
          echo -e "\n::: La syllabation n'est pas mise en oeuvre pour les listes"
+      fi
+      if [ $analyse_phrases == 1 ] ; then
+         usage
+         echo -e "::: L'analyse des phrases n'est pas mise en oeuvre pour les listes. Abandon\n"
+         exit
       fi
       # acquisition des données avec remplacement des espaces par des tildes (ou insécables normales)
       # donnees=$(cat "$objet" | sed 's/\r//' | sed -e 's/ /\xc2\xa0/g')
@@ -1225,11 +1261,12 @@ analyse_par_mots_commun()
          supp_chiffre
          echo "::: Suppression des chiffres" | tee -a $fichier_sortie
       fi
-      filtrer "$donnees"
+      filtrer "$donnees" "1"
       donnees=$donnees_int
       unset donnees_int
-      liste3="- _ . , / ' \xe2\x80\x99 $ £ € ¥ ° % ‰"
-      nb_punct_dans_mots=$(onyva "$donnees" "$liste3")
+      liste3="- _ , / ' \xe2\x80\x99 $ £ € ¥ ° % ‰"
+#      nb_punct_dans_mots=$(onyva "$donnees" "$liste3")
+#      nb_punct_dans_mots=$(($nb_punct_dans_mots +1))
       liste4="\xc2\xa0 \xe2\x80\xaf"
       nb_total_insecables=$(onyva "$donnees" "$liste4")
       if [ "$bas_de_casse" == "1" ];then
@@ -1253,14 +1290,41 @@ analyse_par_mots_commun()
       fi
    fi
 }
-# fin analyse par mots commun--------fonction : analyse par mots détail---------------------
+# fin analyse par mots commun--------fonction : analyse par phrases-------------------------
+analyse_par_phrases()
+{
+donnees_ici=$donnees
+donnees_ici=$(echo $donnees_ici | sed -E -e 's/(\. |\? |! | !|\x20$)/\n/g')
+echo -e "\n::: Analyse des phrases :::" | tee -a $fichier_sortie
+awk 'BEGIN {print "::: Rang;longueur;phrase"} {print NR, ":::",NF, "=>", substr($0,0,150)} {somme=somme+NF} {if(NF>max){max = NF}} \
+     END {printf "%s %d %s %d %s %.2f %s %s %d %s",  \
+         "\nNombre de phrases :", NR, "\nNombre total de mots :", somme, "\nLongueur moyenne des phrases :", somme/NR, "mots", \
+          "\nPhrase de plus grande longueur :", max, "mots\n"}' <<< $donnees_ici | tee -a $fichier_sortie
+list_long=$(awk '{print NF}' <<< $donnees_ici)
+nb_phrases=$(awk 'END {print NR}' <<< $donnees_ici)
+echo -e "\n::: Répartition des phrases par nombre de mots" | tee -a $fichier_sortie
+echo -e "::: Rang;longueur en mots; nombre de phrases" | tee -a $fichier_sortie
+rang=0
+list_long=$(sed -e 's/ /\n/g' <<< $list_long)
+list_long=$(sort -g <<<$list_long)
+list_long_max=$(awk 'END {print $NF}' <<<$list_long)
+for valeur in $(seq 1 $list_long_max) ; do
+    compt=$(awk -F ' ' -v value="$valeur" '{if($1 == value) {cpt+=1}} END {print cpt}' <<< "$list_long" )
+       if [ $compt ] ; then
+          let rang++
+          pourcent=$( echo "scale=2; $compt*100/$nb_phrases" | bc -l )
+          echo -e "$rang ::: $valeur => $compt soit $pourcent %" | tee -a $fichier_sortie
+       fi
+done
+}
+# fin analyse par phrases------------fonction : analyse par mots détail---------------------
 analyse_par_mots_detail()
 {
    # copie de donnees de chaîne en tableau temporaire
    donnees_tab=( $donnees )
    if [ $lister_m_texte == 1 ] && [ $lister_liste == 1 ]; then
       echo | tee -a $fichier_sortie
-      echo -e "::: Taille des mots" | tee -a $fichier_sortie
+      echo -e "::: Analyse des mots :::" | tee -a $fichier_sortie
       echo "::: Rang;longueur en lettres;mot" | tee -a $fichier_sortie
    fi
    # avec LC_ALL=C, ${#donnees_tab[i]} compte les octets et non les caractères
@@ -1388,7 +1452,7 @@ analyse_par_mots_detail()
    fi
    echo "::: ----------------------------------------------------------------------------" | tee -a $fichier_sortie
 }
-# fin analyse par mots détail--------fonction : analyse par caractères------------------------
+# fin analyse par mots détail--------fonction : analyse par caractères----------------------
 analyse_par_caracteres()
 {
    set -f
@@ -1499,7 +1563,7 @@ affichage_frequence()
    echo -e "::: Indice de Shannon : $indice_shannon - Indice de Simpson : $indice_simpson"| tee -a $fichier_sortie
    echo "::: ---------------------------------------------------------------------------" | tee -a $fichier_sortie
 }
-# fin affichage fréquence------------fonction : calcul variable temporaire-----------------
+# fin affichage fréquence------------fonction : calcul variable temporaire------------------
 calcul_variable_temp()
 {
 # cette fonction établit variable_temp pour tous les traitements.
@@ -1522,7 +1586,7 @@ done
 variable_temp=${variable_tmp[*]}
 unset passe debut pas i variable_tmp variable_boucle
 }
-# fin calcul variable temporaire-----fonction : calcul des indices -----------------------
+# fin calcul variable temporaire-----fonction : calcul des indices -------------------------
 calcul_indice()
 {
    if [ "$2" == "supp_l1" ]; then
@@ -1548,7 +1612,7 @@ calcul_indice()
    variable_gini_h=$(echo -e "$variable_gini_h" | sort -n -k 2 | nl )
    indice_gini_h=$(awk '{A += $1*$3} ; {B += $3} ; END  {if (B != 0) {printf "%.4f\n", 1-((2*A)/(NR*B)-(NR+1)/(NR))} else printf "%s\n", "non calculable"}' <<< $variable_gini_h)
 }
-# fin calcul indices-----------------fonction : analyse de la frequence des mots-----------
+# fin calcul indices-----------------fonction : analyse de la frequence des mots------------
 analyse_par_mots_frequence()
 {
    # établissement de la liste des mots index à appliquer aux données à analyser
@@ -1667,7 +1731,7 @@ analyse_par_mots_frequence()
       if [ "$supp_chiffre_i" == "1" ] ; then
           liste_mots_1=$(tr -d [:digit:] <<< $liste_mots_1)
       fi
-      filtrer "$liste_mots_1"
+      filtrer "$liste_mots_1" "0"
       liste_mots_1=$donnees_int
       unset donnees_int
       if [ "$bas_de_casse_i" == "1" ] ; then
@@ -1704,7 +1768,7 @@ analyse_par_mots_frequence()
       affichage_frequence
    fi # fin lister_i
 }
-# fin analyse par mots frequence-----fonction : verification-------------------------------
+# fin analyse par mots frequence-----fonction : verification--------------------------------
 verification()
 {
    echo -e "\n::: Vérification :::\n" | tee -a $fichier_sortie
@@ -1732,7 +1796,7 @@ verification()
    fi
    echo "::: ----------------------------------------------------------------------------"
 }
-# fin verification-------------------fonction : mots2csv-----------------------------------
+# fin verification-------------------fonction : mots2csv------------------------------------
 mots2csv()
 {
    # un peu répétitif, mais clair et l'enchaînement des sed par pipe ne marche qu'en partie seulement
@@ -1745,7 +1809,7 @@ mots2csv()
    donnees=$(sed -E -e 's/^Fr.quence .*|^Taille .*|^R.partition .*|^Nombre .*/&;;/g' <<< $donnees)
    echo -e "$donnees\n" > $fichier_sortie.csv
 }
-# fin mots2csv ----------------------fonction : mots2pdf-----------------------------------
+# fin mots2csv ----------------------fonction : mots2pdf------------------------------------
 mots2pdf()
 {
    type enscript &>/dev/null && type ps2pdfwr &>/dev/null
@@ -1755,11 +1819,20 @@ mots2pdf()
           -B --margin=20:5:5:5: -f Helvetica@9/10 -j 2>/dev/null | ps2pdfwr - > $fichier_sortie.pdf
    fi
 }
-# fin mots2pdf ----------------------main--------------------------------------------------
+# fin mots2pdf -----------------------------main--------------------------------------------
 
 preliminaire
 
 analyse_par_mots_commun "$@"
+
+if [ "$analyse_phrases" == "1" ] ; then
+   analyse_par_phrases "$@"
+fi
+donnees=$(gawk '{ print gensub(/(\.+)([\x20\x0a\x0d\x0a]|$)+/, " ", "g", $0) }' <<< $donnees)
+donnees=$(tr -d [!?] <<< $donnees)
+liste3="- _ . , / ' \xe2\x80\x99 $ £ € ¥ ° % ‰"
+nb_punct_dans_mots=$(onyva "$donnees" "$liste3")
+# echo "1804" "$nb_punct_dans_mots"
 
 # rappel : par defaut des trois options ci-dessous "analyse_mots_detail=1"
 if [ "$analyse_mots_detail" == "1" ] ; then

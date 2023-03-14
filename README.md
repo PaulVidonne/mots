@@ -1,7 +1,7 @@
-Présentation des fichiers de ce dépôt, à jour le 21/02/2023.
+Présentation des fichiers de ce dépôt, à jour le 14/03/2023.
  
 # mots #
-Ecrit en bash le logiciel **mots** version 6.62 b-20230109 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille.
+Ecrit en bash, le logiciel **mots** version 7.00 b-20230314 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille. La version 7.00 ajoute l'analyse des phrases.
 
 
 *Aide très détaillée : **mots** --help*
@@ -76,6 +76,10 @@ Le script bash **clean** version 3.00 b-20221130 recherche les fichiers et répe
 Ecrit en bash, le script **longli** version 1.20 b-20221226 compte le nombre de caractères des lignes d'un fichier texte et affiche le début de celles qui dépassent une longueur paramétrable.
 
 *Aide : **longli** --help*
+
+# iban #
+
+Le script bash **iban** version 1.00 b-20230302 calcule le RIB et l'IBAN d'un compte bancaire français à partir des numéros de la banque, du guichet et du compte. Le résultat peut être envoyé dans un fichier.
 
 # triangle #
 
