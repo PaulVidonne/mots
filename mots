@@ -809,9 +809,9 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
           echo -e "::: L'analyse par phrases exige la présence de la ponctuation. Abandon\n"
           exit
       fi
-      if [[ $lister_liste == "0" && $lister_c_alpha == "1" || $lister_c_freq == "1" || $lister_f_alpha == "1" || $lister_f_freq == "1" ||\
-            $lister_x_alpha == "1" || $lister_x_freq == "1" || $lister_x_freq == "1" || $lister_i_alpha == "1" || $lister_i_freq == "1" ]] ; then
-          echo -e "\n::: L'option -sl est inopérante pour les options -ca, -cf, -fa, -ff, -xa, -xf, -ia, -if. On continue néanmoins"
+      if [[ $lister_liste == "0" && ($lister_c_alpha == "1" || $lister_c_freq == "1" || $lister_f_alpha == "1" || $lister_f_freq == "1" ||\
+            $lister_x_alpha == "1" || $lister_x_freq == "1" || $lister_x_freq == "1" || $lister_i_alpha == "1" || $lister_i_freq == "1") ]] ; then
+          echo -e "\n::: L'option -sl est inopérante avec -ca, -cf, -fa, -ff, -xa, -xf, -ia, -if. On continue néanmoins"
       fi
       # etablissement de l'analyse par defaut
       if [ "$analyse_mots_detail" != "1" ] && [ "$analyse_chars" != "1" ] && [ "$analyse_frequence" != "1" ];then
