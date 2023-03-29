@@ -1,7 +1,7 @@
 #!/bin/bash
 
 origin=mots
-version="7.10 b-20230326"
+version="7.10 b-20230329"
 
 # pour debug
 # set -x
@@ -147,7 +147,7 @@ cat << EOF
 
    REGROUPEMENT D'OPTIONS
 
-      -z    regroupe les options -s -fa -sl de sorte que toutes les données et tous les
+      -z    regroupe les options -l -s -ph -cf -sl de sorte que toutes les données et tous les
             indices sont affichés de manière synthétique par une seule commande.
 
    SOUS-OPTIONS GENERALES
@@ -658,9 +658,11 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
          lister_liste=0
       elif [ $i == "-z" ]; then
          analyse_mots_detail=1
+         lister_m_texte=1
          option_syllabeur=1
-         analyse_frequence=1
-         lister_f_alpha=1
+         analyse_phrases=1
+         analyse_chars=1
+         lister_c_freq=1
          lister_liste=0
       elif [ $i == "-v" ]; then
          analyse_mots_detail=1
@@ -811,7 +813,7 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
       fi
       if [[ $lister_liste == "0" && ($lister_c_alpha == "1" || $lister_c_freq == "1" || $lister_f_alpha == "1" || $lister_f_freq == "1" ||\
             $lister_x_alpha == "1" || $lister_x_freq == "1" || $lister_x_freq == "1" || $lister_i_alpha == "1" || $lister_i_freq == "1") ]] ; then
-          echo -e "\n::: L'option -sl est inopérante avec -ca, -cf, -fa, -ff, -xa, -xf, -ia, -if. On continue néanmoins"
+          echo -e "\n::: L'option -sl est inopérante pour -ca, -cf, -fa, -ff, -xa, -xf, -ia, -if."
       fi
       # etablissement de l'analyse par defaut
       if [ "$analyse_mots_detail" != "1" ] && [ "$analyse_chars" != "1" ] && [ "$analyse_frequence" != "1" ];then
