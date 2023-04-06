@@ -1,7 +1,7 @@
 #!/bin/bash
 
 origin=mots
-version="7.10 b-20230329"
+version="7.20 b-20230405"
 
 # pour debug
 # set -x
@@ -21,7 +21,7 @@ fi
 if [ ! -t 0 ]; then
    type_entree=pipee    # entrée des données par pipe "|" ou redirection "<"
 else
-   type_entree=directe  # entrée des données par fichier désigné dans la ligne de commnade
+   type_entree=directe  # entrée des données par fichier désigné dans la ligne de commande
 fi
 
 usage()
@@ -92,7 +92,8 @@ cat << EOF
       -ca    liste les caractères du texte avec leur fréquence dans l'ordre alphabétique.
 
       -cf    liste les caractères du texte avec leur rang et leur fréquence dans l'ordre de
-             leur fréquence et dans l'ordre alphabétique en second rang.
+             leur fréquence et dans l'ordre alphabétique en second rang. Cette option tente
+             de comparer la fréquence des caractères au regard de celle de quelques langues.
 
    FREQUENCE DES MOTS
              toutes les options ci-après calculent la fréquence des mots et les quatre indices
@@ -147,8 +148,8 @@ cat << EOF
 
    REGROUPEMENT D'OPTIONS
 
-      -z    regroupe les options -l -s -ph -cf -sl de sorte que toutes les données et tous les
-            indices sont affichés de manière synthétique par une seule commande.
+      -z    regroupe les options -l -s -ph -cf -ff -sl de sorte que toutes les données et
+            tous les indices sont affichés de manière synthétique par une seule commande.
 
    SOUS-OPTIONS GENERALES
              les sous-options générales s'appliquent aux analyses des mots et à celles des
@@ -208,8 +209,8 @@ cat << EOF
              peut représenter tout fichier informatique (a priori composé de texte), pour tout
              charset. Le logiciel vérifiera le type et écartera les fichiers non exploitables :
              binaires, fichiers au format traitement de texte en particulier. Ce fichier
-             sera débarassé des éventuels détritus qu'il peut comporter. Il nest pas possible
-             d'indiquer plusieurs noms de fichiers. Le fichier indiqué peut compendre un ou
+             sera débarassé des éventuels détritus qu'il peut comporter. Il n'est pas possible
+             d'indiquer plusieurs noms de fichiers. Le fichier indiqué peut compendre une ou
              plusieurs espaces. Il ne peut commencer par un tiret "-". Les paramétres de
              remplacement ( * et ? ) peuvent être utilisés si leur usage conduit à la désignation
              d'un seul fichier et si le globbing est actif (peut l'être par la commande 'set +f').
@@ -308,7 +309,8 @@ cat << EOF
              phrases moins 8, le tout divisé par 1,2.
 
       indice de Coleman-Liau
-             indice non syllabique dû à Meri Coleman et T.L. Liau.
+             indice non syllabique dû à Meri Coleman et T.L. Liau, conçu pour sa facilité de
+             calcul.
 
       indice ARI (Automated Readability Index)
              indice non syllabique. Provient de l'armée américaine dans les années 60. Destiné
@@ -429,6 +431,12 @@ cat << EOF
 
              Dans la répartition des mots par nombre de lettres, les mots de plus de 124
              caractères ne sont pas affichés.
+
+             La tentative de déceler la fréquence des caractères au regard de quelques langues
+             (français, anglais, espagnol, allemand, italien) repose sur la fréquence des dix
+             premières occurences comparées aux listes connues. Le résultat n'est affiché que
+             s'il est positif. Compte tenu de la grande proximité de fréquence des dix premiers
+             caractères de ces cinq langues, ce résultat est peut être inattendu.
 
              Il résulte de la définition des phrases que les titres, en principe non suivis
              d'un point, ne sont pas considérés comme des phrases et sont rattachés au début
@@ -663,6 +671,8 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
          analyse_phrases=1
          analyse_chars=1
          lister_c_freq=1
+         analyse_frequence=1
+         lister_f_freq=1
          lister_liste=0
       elif [ $i == "-v" ]; then
          analyse_mots_detail=1
@@ -811,9 +821,9 @@ if [ $nb_arg_ligne_cmd -lt 24 ]; then
           echo -e "::: L'analyse par phrases exige la présence de la ponctuation. Abandon\n"
           exit
       fi
-      if [[ $lister_liste == "0" && ($lister_c_alpha == "1" || $lister_c_freq == "1" || $lister_f_alpha == "1" || $lister_f_freq == "1" ||\
-            $lister_x_alpha == "1" || $lister_x_freq == "1" || $lister_x_freq == "1" || $lister_i_alpha == "1" || $lister_i_freq == "1") ]] ; then
-          echo -e "\n::: L'option -sl est inopérante pour -ca, -cf, -fa, -ff, -xa, -xf, -ia, -if."
+      if [[ $lister_liste == "0" && ($lister_x_alpha == "1" || $lister_x_freq == "1" || $lister_i_alpha == "1" || $lister_i_freq == "1") \
+          || $lister_c_alpha == "1" || $lister_c_freq == "1" ]] ; then
+          echo -e "\n::: L'option -sl est inopérante pour -ca, -cf, -xa, -xf, -ia, -if."
       fi
       # etablissement de l'analyse par defaut
       if [ "$analyse_mots_detail" != "1" ] && [ "$analyse_chars" != "1" ] && [ "$analyse_frequence" != "1" ];then
@@ -1036,7 +1046,7 @@ syllabeur()
        } { print "\n",n,a,sk } ;' <<< $mot) # fin de sortie=awk
        # formatage de la sortie
        sortie=$(echo $sortie | awk '{print " :::", $1, "=>", $2, "("$3")" }')
-       nb_mots=$(($nb_mots + 1))
+       let nb_mots++
        if [ $lister_liste == 1 ] ; then
           echo $nb_mots" "$sortie | tee -a $fichier_sortie
        else
@@ -1162,8 +1172,10 @@ donnees_int=$1
    if [ "$2" == "1" ] ; then
       # suppression des virgules qui subsistent en fin de mot et de ligne
       donnees_int=$(gawk '{ print gensub(/(,+)([\x20\x0a\x0d\x0a]|$)+/, " ", "g", $0) }' <<< $donnees_int)
-      # suppression des point d'exclamation et interrogation sauf suivis espace
+      # suppression des points d'exclamation et interrogation sauf suivis espace
       donnees_int=$(gawk '{ print gensub(/(\?+|!+)([^ ]+)/, "\\2", "g", $0) }' <<< $donnees_int)
+      # suppression des points successifs
+      donnees_int=$(gawk '{ print gensub(/\.+/, ".", "g", $0) }' <<< $donnees_int)
    else
       # suppression des points et virgules qui subsistent en fin de mot et de ligne
       donnees_int=$(gawk '{ print gensub(/(\.+|,+)([\x20\x0a\x0d\x0a]|$)+/, " ", "g", $0) }' <<< $donnees_int)
@@ -1301,7 +1313,7 @@ analyse_par_mots_commun()
    donnees_ici=$donnees
    # echo $donnees_ici
    donnees_ici=$(echo $donnees_ici | sed -E -e  's/([.!?])(\x20|$)/\1\n/g')
-   nb_mots=$(gawk '{if($0 ~ /(^\.|\x20\.|\?|!)|$)/){NF1=NF -1} else {NF1=NF}} {somme=somme + NF1} END {print somme}' <<< $donnees_ici)
+   nb_mots=$(gawk '{if($0 ~ /(\x20\.+|\x20\?+|\x20!+)$/){NF1=NF -1} else {NF1=NF}} {somme=somme + NF1} END {print somme}' <<< $donnees_ici)
    nb_phrases=$(awk 'END {print NR}' <<< $donnees_ici)
    unset donnees_ici
    donnees=$(gawk '{ print gensub(/(\.+)([\x20\x0a\x0d\x0a]|$)+/, " ", "g", $0) }' <<< $donnees)
@@ -1312,20 +1324,20 @@ analyse_par_mots_commun()
 # fin analyse par mots commun--------fonction : analyse par phrases-------------------------
 analyse_par_phrases()
 {
-   echo -e "\n::: Analyse des phrases :::" | tee -a $fichier_sortie
+   echo -e "::: Analyse des phrases :::" | tee -a $fichier_sortie
    if [ $lister_m_texte == 1 ] && [ $lister_liste == 0 ] ; then
       echo -e "::: Analyse des phrases en cours ...\n"
    fi
    if [ $lister_liste == 1 ] ; then
       gawk 'BEGIN {print "::: Rang;longueur;phrase"} \
-      {if($0 ~ /(^\.|\x20\.|\?|!)|$)/){NF1=NF -1} else {NF1=NF}} {print NR, ":::", NF1, "=>", substr($0,0,150)} {somme=somme + NF1} {if(NF1>max){max = NF1}} \
+      {if($0 ~ /(\x20\.+|\x20\?+|\x20!+)$/){NF1=NF -1} else {NF1=NF}} {print NR, ":::", NF1, "=>", substr($0,0,150)} {somme=somme + NF1} {if(NF1>max){max = NF1}} \
       {if ($0 ~ /.*(\x20\.|\.)(\x20|$)/){nb_dcl +=1}} {if ($0 ~ /.*(\x20!|!)(\x20|$)/){nb_exc +=1}} {if ($0 ~ /.*(\x20\?|\?)(\x20|$)/){nb_int +=1}} \
       END {printf "%s %d %s %d %s %.2f %s %s %d %s %s %d" "%s" "%d" "%s" "%d" "%s" "%d",  \
          "\n::: Nombre de phrases :", NR, "\n::: Nombre total de mots :", somme, "\n::: Longueur moyenne des phrases :", somme/NR, "mots", \
          "\n::: Phrase de plus grande longueur :", max, "mots", "\n::: Nombre de phrases déclaratives :", nb_dcl, "\n::: Nombre de phrases exclamatives : ", nb_exc, \
          "\n::: Nombre de phrases interrogatives : ", nb_int, "\n::: Nombre de phrases indéterminées : ", NR-(nb_dcl+nb_exc+nb_int) } ' <<< $donnees_ici | tee -a $fichier_sortie
    else
-      gawk '{if($0 ~ /(^\.|\x20\.|\?|!)|$)/){NF1=NF -1} else {NF1=NF}} {somme=somme + NF1} {if(NF1>max){max = NF1}} \
+      gawk '{if($0 ~ /(\x20\.+|\x20\?+|\x20!+)$/){NF1=NF -1} else {NF1=NF}} {somme=somme + NF1} {if(NF1>max){max = NF1}} \
             {if ($0 ~ /.*(\x20\.|\.)(\x20|$)/){nb_dcl +=1}} {if ($0 ~ /.*(\x20!|!)(\x20|$)/){nb_exc +=1}} {if ($0 ~ /.*(\x20\?|\?)(\x20|$)/){nb_int +=1}} \
       END {printf "%s %d %s %d %s %.2f %s %s %d %s %s %d" "%s" "%d" "%s" "%d" "%s" "%d",  \
          "::: Nombre de phrases :", NR, "\n::: Nombre total de mots :", somme, "\n::: Longueur moyenne des phrases :", somme/NR, "mots", \
@@ -1381,6 +1393,7 @@ analyse_par_mots_detail()
    LC_ALL=C
    unset donnees_tab
    # on peut faire le calcul de la répartition des mots par nombre de lettres
+   # if [ $lister_m_texte == 1 ] && [ $lister_liste == 1 ] ; then
    if [ $lister_m_texte == 1 ] ; then
       echo -e "\n::: Répartition des mots par nombre de lettres" | tee -a $fichier_sortie
       echo -e "::: Rang;longueur en lettres; nombre de mots" | tee -a $fichier_sortie
@@ -1548,6 +1561,7 @@ analyse_par_caracteres()
       exit
    fi
    echo -e "\n::: Analyse des caractères :::" | tee -a $fichier_sortie
+   # if [ $lister_c_alpha == 1 ] && [ $lister_liste == 1 ] ; then
    if [ $lister_c_alpha == 1 ] ; then
       echo -e "::: Caractères comptabilisés : "$liste_car | tee -a $fichier_sortie
       echo -e "::: Fréquence des caractères (par ordre alphabétique)" | tee -a $fichier_sortie
@@ -1556,22 +1570,98 @@ analyse_par_caracteres()
       resultats=$(sed -E -e '/Total.*$/d' <<< sed -E -e '/^ $/d' <<< $resultats)
       awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "soit " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
    fi
+   # if [ $lister_c_freq == 1 ] && [ $lister_liste == 1 ] ; then
    if [ $lister_c_freq == 1 ] ; then
       if [ $lister_c_alpha == 1 ] ; then echo ; fi | tee -a $fichier_sortie
-      echo -e "::: Caractères comptabilisés : "$liste_car | tee -a $fichier_sortie
-      echo -e "::: Fréquence des caractères (par ordre décroissant des fréquences)" | tee -a $fichier_sortie
-      echo -e "::: Rang;fréquence;caractère" | tee -a $fichier_sortie
-      resultats=$(sort -t " " -k 2rn,2 -k 4b,4 <<< $resultats)
-      resultats=$(sed -E -e '/Total.*$/d' <<< sed -E -e '/^ $/d' <<< $resultats)
-      awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "soit " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
-   fi
+         echo -e "::: Caractères comptabilisés : "$liste_car | tee -a $fichier_sortie
+         echo -e "::: Fréquence des caractères (par ordre décroissant des fréquences)" | tee -a $fichier_sortie
+         echo -e "::: Rang;fréquence;caractère" | tee -a $fichier_sortie
+         resultats=$(sort -t " " -k 2rn,2 -k 4b,4 <<< $resultats)
+         resultats=$(sed -E -e '/Total.*$/d' <<< sed -E -e '/^ $/d' <<< $resultats)
+         awk -v awk_local=$nb_chars_dans_car 'CONVFMT = "%.2f" {print $1,$2,$3,$4, "soit " $2*100/awk_local, "%"}' <<< $resultats | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
+      else
+        resultats=$(sort -t " " -k 2rn,2 -k 4b,4 <<< $resultats)
+        resultats=$(sed -E -e '/Total.*$/d' <<< sed -E -e '/^ $/d' <<< $resultats)
+      fi
+   langue
    echo -e "\n::: Analyse des caractères :::" | tee -a $fichier_sortie
    echo -e "$donnees_source$ligne_cmd_ori " | tee -a $fichier_sortie
+   if [[ -n $lang ]] ; then
+      echo -e "::: Fréquence des caractères proche de : "$lang | tee -a $fichier_sortie
+   fi
    echo -e "::: Nombre de caractères (espaces non compris) : "$l_liste_tmp | tee -a $fichier_sortie
    echo -e "::: Nombre d'occurrences de ces caractères : "$nb_chars_dans_car | tee -a $fichier_sortie
    echo "::: ---------------------------------------------------------------------------" | tee -a $fichier_sortie
 }
-# fin analyse par caractères---------fonction : affichage fréquence-------------------------
+# fin analyse par caractères----------------fonction : langue--------------------------------
+langue()
+{
+   liste=$(awk '{print ($4)}' <<< $resultats)
+   liste=$(sed -E -e 's/[^a-z]//g' <<< $liste)
+   liste=$(echo $liste | awk '{print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 }')
+   lang_fr="esaitnrulo"
+   lang_en="etaonisrhl"
+   lang_es="eaoinsrldt"
+   lang_al="enrisatdhu"
+   lang_it="eiaonlrtsc"
+   compt=0
+   for i in $liste ; do
+      if [[ $lang_fr =~ $i ]] ; then
+         let compt++
+         if [ $compt -ge 10 ] ; then
+            lang=français
+         fi
+      fi
+   done
+   compt=0
+   if [ -z $lang ] ; then
+     for i in $liste ; do
+        if [[ $lang_en =~ $i ]] ; then
+          let compt++
+          if [ $compt -ge 10 ] ; then
+             lang=anglais
+          fi
+       fi
+     done
+  fi
+  compt=0
+  if [ -z $lang ] ; then
+     for i in $liste ; do
+        if [[ $lang_es =~ $i ]] ; then
+           let compt++
+           if [ $compt -ge 10 ] ; then
+              lang=espagnol
+          fi
+       fi
+     done
+   fi
+   compt=0
+   if [ -z $lang ] ; then
+      for i in $liste ; do
+         if [[ $lang_al =~ $i ]] ; then
+           let compt++
+           if [ $compt -ge 10 ] ; then
+              lang=allemand
+           fi
+        fi
+     done
+   fi
+   compt=0
+   if [ -z $lang ] ; then
+      for i in $liste ; do
+         if [[ $lang_it =~ $i ]] ; then
+           let compt++
+           if [ $compt -ge 10 ] ; then
+              lang=italien
+           fi
+        fi
+     done
+   fi
+#  if [ -z $lang ] ; then
+#      lang="inconnu"
+#   fi
+}
+# fin fonction langue ----------------fonction : affichage fréquence-------------------------
 affichage_frequence()
 {
    taux_h=$(echo "scale=5; $hapax*100/$nb_mots_1" | bc -l)
@@ -1686,8 +1776,9 @@ analyse_par_mots_frequence()
          lister_i_alpha=1
       fi
 
-      if [ $lister_f_alpha == "1" ] ; then
-         # sortie triée dans l'ordre alphabétique
+      # if [ $lister_f_alpha == "1" ] ; then
+      if [ $lister_f_alpha == "1" ] && [ $lister_liste == 1 ] ; then
+        # sortie triée dans l'ordre alphabétique
          echo -e "\n::: Fréquence des mots (par ordre alphabétique)" | tee -a $fichier_sortie
          echo -e "::: Rang;fréquence;mot" | tee -a $fichier_sortie
          variable_temp=$(sort -t " " -k 4b,4 -k 2rn,2 <<< $variable_temp)
@@ -1695,8 +1786,9 @@ analyse_par_mots_frequence()
          echo "$variable_temp" | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
       fi # lister f alpha
 
-      if [ $lister_f_freq == "1" ] ; then
-         # sortie triée dans l'ordre des fréquences
+      # if [ $lister_f_freq == "1" ] ; then
+      if [ $lister_f_freq == "1" ] && [ $lister_liste == 1 ] ; then
+        # sortie triée dans l'ordre des fréquences
          echo -e "\n::: Fréquence des mots (par ordre décroissant des fréquences)" | tee -a $fichier_sortie
          echo -e "::: Rang;fréquence;mot" | tee -a $fichier_sortie
          variable_temp=$(sort -t " " -k 2rn,2 -k 4b,4 <<< $variable_temp)
@@ -1728,13 +1820,13 @@ analyse_par_mots_frequence()
             calcul_indice "$variable_temp_freq"
          fi
       fi
-
+      # if [ $lister_x_alpha == 1 ] && [ $lister_liste == 1 ] ; then
       if [ $lister_x_alpha == 1 ] ; then
-         echo -e "\n::: Fréquence des mots (par ordre alphabétique)" | tee -a $fichier_sortie
+        echo -e "\n::: Fréquence des mots (par ordre alphabétique)" | tee -a $fichier_sortie
          echo -e "::: Rang;fréquence;mot" | tee -a $fichier_sortie
          echo "$variable_temp_alpha" | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
       fi # option lister x alpha
-
+      # if [ $lister_x_freq == 1 ] && [ $lister_liste == 1 ] ; then
       if [ $lister_x_freq == 1 ] ; then
          echo -e "\n::: Fréquence des mots (par ordre décroissant des fréquences)" | tee -a $fichier_sortie
          echo -e "::: Rang;fréquence;mot" | tee -a $fichier_sortie
@@ -1784,6 +1876,7 @@ analyse_par_mots_frequence()
       calcul_indice "$variable_temp" "supp_l1"
       hapax=$(echo "$variable_temp" | grep "::: 1 " | wc -l)
       du_fichier_fourni="du fichier $fichier_fourni "
+      # if [ $lister_i_freq == "1" ] && [ $lister_liste == 1 ] ; then
       if [ $lister_i_freq == "1" ] ; then
          # sortie triée dans l'ordre des fréquences
          echo -e "\n::: Fréquence des mots (par ordre décroissant des fréquences)" | tee -a $fichier_sortie
@@ -1792,9 +1885,9 @@ analyse_par_mots_frequence()
          variable_temp=$(echo "$variable_temp" | sed -E -e '/::: Total : .*$/d' | sed -E -e '/^ $/d')
          echo "$variable_temp" | nl | sed -E -e 's/^\s*([0-9]*)\x09/\1 /g' | tee -a $fichier_sortie
       fi # lister fréquence
-
+      # if [ $lister_i_alpha == "1" ] && [ $lister_liste == 1 ] ; then
       if [ $lister_i_alpha == "1" ] ; then
-         # sortie triée dans l'ordre alphabétique
+        # sortie triée dans l'ordre alphabétique
          echo -e "\n::: Fréquence des mots (par ordre alphabétique)" | tee -a $fichier_sortie
          echo -e "::: Rang;fréquence;mot" | tee -a $fichier_sortie
          variable_temp=$(sort -t " " -k 4b,4 -k 2rn,2 <<< $variable_temp)

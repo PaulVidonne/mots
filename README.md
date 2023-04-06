@@ -1,13 +1,13 @@
-Présentation des fichiers de ce dépôt, à jour le 29/03/2023.
+Présentation des fichiers de ce dépôt, à jour le 06/04/2023.
  
 # mots #
-Ecrit en bash, le script **mots** version 7.10 b-20230329 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille.
+Ecrit en bash, le script **mots** version 7.20 b-20230405 décompte les mots, les syllabes, les phrases et les caractères d'un texte ou d'une liste ; il calcule la longueur des mots et des phrases et fait leurs moyennes. Il compte la fréquence des caractères et des mots, avec de nombreuses possibilités : il permet par exemple la recherche de la fréquence des mots d'un vocabulaire donné ou d'une longueur donnée. Il calcule tous les indices classiques de lisibilité auxquels il ajoute un indice spécifique. Il calcule trois indicateurs de richesse de vocabulaire. Il comprend de **nombreuses options et sous-options.** Il restitue les données de manière détaillée ou synthétique à l'écran ou dans un fichier de type texte ou PDF. Il peut établir un fichier de sortie au format CSV pour retraitements externes. Il peut traiter des fichiers de grande taille.
 
 
 *Aide très détaillée : **mots** --help*
 
 # locate.sh #
-Le script bash **locate.sh** version 3.20 b-20221215 est une sur-couche de la commande 'locate'  permettant de retouver des fichiers ou répertoires dont la liste figure dans la base de données générée par 'updatedb'. Il donne la liste de fichiers et de répertoires répondant à la recherche, avec leurs meta données (permissions, propriétaire, taille, date). Les dates des fichiers trouvés sont paramétrables et peuvent être les dates de :
+Le script bash **locate.sh** version 3.20 b-20221215 est une sur-couche de la commande 'locate'  permettant de retouver des fichiers ou répertoires dont la liste figure dans la base de données générée par 'updatedb'. Il donne la liste des fichiers et des répertoires répondant à la recherche, avec leurs meta données (permissions, propriétaire, taille, date). Les dates des fichiers trouvés sont paramétrables et peuvent être les dates de :
 
 * dernière modification (defaut)
 * dernier accès
