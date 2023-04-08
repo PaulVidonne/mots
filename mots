@@ -1,7 +1,7 @@
 #!/bin/bash
 
 origin=mots
-version="7.20 b-20230405"
+version="7.21 b-20230408"
 
 # pour debug
 # set -x
@@ -433,10 +433,11 @@ cat << EOF
              caractères ne sont pas affichés.
 
              La tentative de déceler la fréquence des caractères au regard de quelques langues
-             (français, anglais, espagnol, allemand, italien) repose sur la fréquence des dix
-             premières occurences comparées aux listes connues. Le résultat n'est affiché que
-             s'il est positif. Compte tenu de la grande proximité de fréquence des dix premiers
-             caractères de ces cinq langues, ce résultat est peut être inattendu.
+             (français, anglais, espagnol, allemand, italien, polonais, néerlandais, suédois,
+             tchèque, albanais) repose sur la fréquence des dix premières occurences comparées
+             aux listes connues. Compte tenu de la grande proximité de fréquence des dix premiers
+             caractères de ces différentes langues, ce résultat peut être ambigu (néerlandais
+             et suédois ont même fréquence), voire inattendu.
 
              Il résulte de la définition des phrases que les titres, en principe non suivis
              d'un point, ne sont pas considérés comme des phrases et sont rattachés au début
@@ -1599,67 +1600,27 @@ langue()
    liste=$(awk '{print ($4)}' <<< $resultats)
    liste=$(sed -E -e 's/[^a-z]//g' <<< $liste)
    liste=$(echo $liste | awk '{print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 }')
-   lang_fr="esaitnrulo"
-   lang_en="etaonisrhl"
-   lang_es="eaoinsrldt"
-   lang_al="enrisatdhu"
-   lang_it="eiaonlrtsc"
-   compt=0
-   for i in $liste ; do
-      if [[ $lang_fr =~ $i ]] ; then
-         let compt++
-         if [ $compt -ge 10 ] ; then
-            lang=français
+   declare -A tab_lang
+   tab_lang=( ['aeilnorstu']="français" ['adehinorst']="anglais" ['acdeilnors']="espagnol" ['adehinrstu']="allemand" ['aceilnorst']="italien" \
+              ['adeëhijmnr']="albanais" ['aeilnorstv']="tchèque" ['aeiknorswz']="polonais" ['adeilnorst']="néerlandais_ou_suédois" )
+   cle_tab=${!tab_lang[@]}
+   for cle in $cle_tab ; do
+      compt=0
+      for i in $liste ; do
+         if [[ $cle =~ $i ]] ; then
+            let compt++
+               if [ $compt -ge 10 ] ; then
+                  lang=${tab_lang["$cle"]}
+               fi
          fi
+      done
+      if [[ -n $lang ]] ; then
+         break
       fi
    done
-   compt=0
-   if [ -z $lang ] ; then
-     for i in $liste ; do
-        if [[ $lang_en =~ $i ]] ; then
-          let compt++
-          if [ $compt -ge 10 ] ; then
-             lang=anglais
-          fi
-       fi
-     done
-  fi
-  compt=0
   if [ -z $lang ] ; then
-     for i in $liste ; do
-        if [[ $lang_es =~ $i ]] ; then
-           let compt++
-           if [ $compt -ge 10 ] ; then
-              lang=espagnol
-          fi
-       fi
-     done
+      lang="indéterminé"
    fi
-   compt=0
-   if [ -z $lang ] ; then
-      for i in $liste ; do
-         if [[ $lang_al =~ $i ]] ; then
-           let compt++
-           if [ $compt -ge 10 ] ; then
-              lang=allemand
-           fi
-        fi
-     done
-   fi
-   compt=0
-   if [ -z $lang ] ; then
-      for i in $liste ; do
-         if [[ $lang_it =~ $i ]] ; then
-           let compt++
-           if [ $compt -ge 10 ] ; then
-              lang=italien
-           fi
-        fi
-     done
-   fi
-#  if [ -z $lang ] ; then
-#      lang="inconnu"
-#   fi
 }
 # fin fonction langue ----------------fonction : affichage fréquence-------------------------
 affichage_frequence()
@@ -1878,7 +1839,7 @@ analyse_par_mots_frequence()
       du_fichier_fourni="du fichier $fichier_fourni "
       # if [ $lister_i_freq == "1" ] && [ $lister_liste == 1 ] ; then
       if [ $lister_i_freq == "1" ] ; then
-         # sortie triée dans l'ordre des fréquences
+        # sortie triée dans l'ordre des fréquences
          echo -e "\n::: Fréquence des mots (par ordre décroissant des fréquences)" | tee -a $fichier_sortie
          echo -e "::: Rang;fréquence;mot" | tee -a $fichier_sortie
          variable_temp=$(sort -t " " -k 2rn,2 -k 4b,4 <<< $variable_temp)
