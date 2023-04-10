@@ -1,7 +1,7 @@
 #!/bin/bash
 
 origin=mots
-version="7.21 b-20230408"
+version="7.21 b-20230410"
 
 # pour debug
 # set -x
@@ -87,13 +87,14 @@ cat << EOF
 
    FREQUENCE DES CARACTERES
              les deux options ci-après établissent la fréquence des caractères du texte
-             analysé avec le pourcentage que représente chacun (hors espaces).
+             analysé avec le pourcentage que représente chacun (hors espaces). Elles
+             comparent la fréquence des caractères au regard de celle de quelques langues
+             européennes.
 
       -ca    liste les caractères du texte avec leur fréquence dans l'ordre alphabétique.
 
       -cf    liste les caractères du texte avec leur rang et leur fréquence dans l'ordre de
-             leur fréquence et dans l'ordre alphabétique en second rang. Cette option tente
-             de comparer la fréquence des caractères au regard de celle de quelques langues.
+             leur fréquence et dans l'ordre alphabétique en second rang.
 
    FREQUENCE DES MOTS
              toutes les options ci-après calculent la fréquence des mots et les quatre indices
@@ -274,8 +275,8 @@ cat << EOF
       ponctuation
              la notion de ponctuation est considérée lato sensu. Aux onze signes académiques
              s'en ajoute de nombreux autres. La liste actuelle comprend les 73 suivants ! " #
-             % & ( ) + , - . / : ; < = > ? @ [ \ * ] ^ _ \` { | } ~ ¡ ¦ § ¨ © « ® ° ° ± ´ ¶ ·
-             ¸ » ¿ × ÷ – — ’ “ ” • … ‰ − ¤ ¢ $ £ ¥ € ¹ ½ ¼ ² ³ ¾ ª º ʾ µ
+             % & ( ) + , - . / : ; < = > ? @ [ \ * ] ^ _ \` { | } ~ ¡ ¦ § ¨ © « ® ° ± ´ ¶ · ¸
+             » ¿ × ÷ – — ’ “ ” • … ‰ − ¤ ¢ $ £ ¥ € ¹ ½ ¼ ² ³ ¾ ª º ʾ µ „
 
       charset
              jeu de caractères, de l'anglais "character set", façon de représenter de manière
@@ -970,10 +971,10 @@ if [ "$option_pdf" == "1" ] ; then
 fi
 }
 # fin postliminaire ------------------fonction : petites fct suppression---------------------
-  accent_capit="ÀÁÂĀÃÄÅĄÆÇČĎÐÈÉÊËĚÌÍÎĪÏÍŁÑŇÒÓÔŌÕÖØŒŘŠŞŤŢÙÚÛÜŮÝŸŶŽÞßẞ"
-  accent_bdcas="àáâāãäåąæçčďđèéêëěìíîïīíłñňòóôōõöøœřšşťţùúûüůýÿŷžþßß"
-   accent_tous="àáâāãäåąçčďđèéêëěìíîïīíłñňòóôōõöřšşťţùúûüůýÿŷžÀÁÂĀÃÄÅĄÇČĎÐÈÉÊËĚÌÍÎĪÏÍŁÑŇÒÓÔŌÕÖŘŠŞŤŢÙÚÛÜŮÝŸŶŽ"
-no_accent_tous="aaaaaaaaccddeeeeeiiiiiilnnoooooorssttuuuuuyyyzAAAAAAAACCDDEEEEEIIIIIILNNOOOOOORSSTTUUUUUYYYZ"
+  accent_capit="ÀÁÂĀÃÄÅĄÆÇČĆĎÐÈÉÊËĚĘÌÍÎĪÏÍŁÑŇŃÒÓÔŌÕÖØŒŘŠŞŚŤŢÙÚÛÜŮÝŸŶŽŹŻƵþßẞ"
+  accent_bdcas="àáâāãäåąæçčćďđèéêëěęìíîïīíłñňńòóôōõöøœřšşśťţùúûüůýÿŷžźżƶÞßß"
+   accent_tous="àáâāãäåąçčćďđèéêëěęìíîïīíłñňńòóôōõöøřšşśťţùúûüůýÿŷžźżƶÀÁÂĀÃÄÅĄÇČĆĎÐÈÉÊËĚĘÌÍÎĪÏÍŁÑŇŃÒÓÔŌÕÖØŘŠŞŚŤŢÙÚÛÜŮÝŸŶŽŹŻƵ"
+no_accent_tous="aaaaaaaacccddeeeeeeiiiiiilnnoooooooorsssttuuuuuyyyzzzzAAAAAAAACCCDDEEEEEEIIIIIILNNOOOOOOORSSSSTTUUUUUYYYZZZZ"
 # ---------
 # note : que les fct aient le même nom que des variables n'est pas un problème
 bas_de_casse()
@@ -989,7 +990,7 @@ supp_diacritique()
 # ---------
 supp_punct()
 {
-   donnees=$(sed -E -e 's/ʾ|\x27|\xe2\x80\x99|“|”|%|‰|,|\.|\\|\/|\$|£|€|<|=|>|;|:|\(|\)|\[|\]|\{|\}|!|\?|\"|-|@|#|\*|_|\||§|&|~|\^|`|µ|\+|°|\xe2\x80\x93|−|«|»|½|¼|÷|×|¡|¿|…|·|²|³|®|±|\´|º|¥|©|¨|¾|¹|¸|ª|¦|¶|¤|¢|•|—/ /g' <<< $donnees)
+   donnees=$(sed -E -e 's/ʾ|\x27|\xe2\x80\x99|“|”|%|‰|,|\.|\\|\/|\$|£|€|<|=|>|;|:|\(|\)|\[|\]|\{|\}|!|\?|\"|-|@|#|\*|_|\||§|&|~|\^|`|µ|\+|°|\xe2\x80\x93|−|«|»|½|¼|÷|×|¡|¿|…|·|²|³|®|±|\´|º|¥|©|¨|¾|¹|¸|ª|¦|¶|¤|¢|•|—|„/ /g' <<< $donnees)
    supp_ajout="supprimés "
 }
 # ---------
@@ -1203,7 +1204,7 @@ donnees_int=$1
    else
       donnees_int=$(gawk '{ print gensub(/\xe2\x80\x99{2,}|ʾ| \xe2\x80\x99|\xe2\x80\x99 |“|”|<|=|>|;|:|\(|\)|\[|\]|\{|\}|!|\?|"| -|- |-{2,}|@|#|\*/, " ", "g", $0) }' <<< $donnees_int)
    fi
-   donnees_int=$(gawk '{ print gensub(/ _|_ |_{2,}|\||§|&|~|\^|`|µ|\+|\xe2\x80\x93|−|«|»|½|¼|÷|×|¡|¿|…|·|²|³|®|±|\\´|º|©|¨|¾|¹|¸|ª|¦|¶|¤|¢|•|—/, " ", "g", $0) }' <<< $donnees_int)
+   donnees_int=$(gawk '{ print gensub(/ _|_ |_{2,}|\||§|&|~|\^|`|µ|\+|\xe2\x80\x93|−|«|»|½|¼|÷|×|¡|¿|…|·|²|³|®|±|\\´|º|©|¨|¾|¹|¸|ª|¦|¶|¤|¢|•|—|„/, " ", "g", $0) }' <<< $donnees_int)
    # suppression apostrophe x27 sauf dans les mots
    donnees_int=$(gawk '{ print gensub(/([[:space:]][\x27]|[[:punct:]][\x27]|[\x27][[:space:]]|[\x27][[:punct:]])/, " ", "g", $0) }' <<<$donnees_int)
    donnees_int=$(gawk '{ print gensub(/([^[:alnum:]][\x27]|[\x27]$)/, " ", "g", $0) }' <<< $donnees_int)
@@ -1259,7 +1260,7 @@ analyse_par_mots_commun()
       donnees=$(echo $donnees_brutes | tr '\n\r\f' ' ' | tr '\\' '#')
       # passage iconv (ne convertit pas les CR LF FF)
       donnees=$(iconv -c -f $char_set -t utf-8 <<< $donnees)
-      liste1='\x27 \xe2\x80\x99 ! \" #  “ ” % ‰ & ( ) \* + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ ¡ § « ° » ¿ ÷ × − – $ £ € ½ ¼ ʾ µ …  · ² ³ ® ± ´ º ¥ © ¨ ¾ ¹ ¸ ª ¦ ¶ ¤ ¢ • —'
+      liste1='\x27 \xe2\x80\x99 ! \" #  “ ” % ‰ & ( ) \* + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ ¡ § « ° » ¿ ÷ × − – $ £ € ½ ¼ ʾ µ …  · ² ³ ® ± ´ º ¥ © ¨ ¾ ¹ ¸ ª ¦ ¶ ¤ ¢ • — „'
       nb_total_punct=$(onyva "$donnees" "$liste1")
       if [ -z $nb_total_punct ] ; then
          usage
@@ -1602,7 +1603,7 @@ langue()
    liste=$(echo $liste | awk '{print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12 }')
    declare -A tab_lang
    tab_lang=( ['aeilnorstu']="français" ['adehinorst']="anglais" ['acdeilnors']="espagnol" ['adehinrstu']="allemand" ['aceilnorst']="italien" \
-              ['adeëhijmnr']="albanais" ['aeilnorstv']="tchèque" ['aeiknorswz']="polonais" ['adeilnorst']="néerlandais_ou_suédois" )
+              ['adeëhijmnr']="albanais" ['aeilnorstv']="tchèque" ['aceiknosyz']="polonais" ['adeilnorst']="néerlandais_ou_suédois" )
    cle_tab=${!tab_lang[@]}
    for cle in $cle_tab ; do
       compt=0
