@@ -6,8 +6,8 @@ version="7.21 b-20230416"
 # pour debug
 # set -x
 # date
-file="tmp$(date +%m%d-%H%M%S)"
-cp "$0" "$file"
+# file="tmp$(date +%m%d-%H%M%S)"
+# cp "$0" "$file"
 # rm -f $(basename $0)_var_*.log
 # source mots_variables
 # affiche_var ${LINENO} 0
