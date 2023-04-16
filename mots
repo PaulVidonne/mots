@@ -1,13 +1,13 @@
 #!/bin/bash
 
 origin=mots
-version="7.21 b-20230410"
+version="7.21 b-20230416"
 
 # pour debug
 # set -x
 # date
-# file="tmp$(date +%m%d-%H%M%S)"
-# cp "$0" "$file"
+file="tmp$(date +%m%d-%H%M%S)"
+cp "$0" "$file"
 # rm -f $(basename $0)_var_*.log
 # source mots_variables
 # affiche_var ${LINENO} 0
@@ -421,7 +421,9 @@ cat << EOF
              n'est pas évident, un caractère pouvant correspondre de un à six octets selon le
              charcet. Seul l'us-acii assure l'égalité du nombre d'octets et de caractères. wc
              peut faire apparaître un nombre de mots un peu supérieur, ce qui est normal
-             compte tenu de la définition très extensive de ce qu'est un mot pour wc.
+             compte tenu de la définition très extensive de ce qu'est un mot pour wc. De même
+             'grep -c' compte le nombre de ligne comprenant un motif, mais non le nombre de
+             motifs.
 
              Les éventuelles séquences d'échappement non permises dans le texte source sont
              éliminées sans avertissement (FF entre autres).
@@ -1692,14 +1694,12 @@ calcul_indice()
    else
       indice_shannon="non calculable"
    fi
-   indice_simpson=$(awk -v N=$nb_mots_avant ' { A += $2*($2-1) } ; { if (N!=1) B = N*(N-1)} ; {if (N!=1) D = 1-(A/B)} ;  \
-          END { if (N!=1) {printf "%.4f\n", D} else printf "%s\n", "non calculable"}' <<< $variable_indice)
+   indice_simpson=$(awk -v N=$nb_mots_avant ' { A += $2*($2-1) } END { if (N!=1) {printf "%.4f\n", (1-(A/(N*(N-1))))} else printf "%s\n", "non calculable"}' <<< $variable_indice)
    variable_gini=$(echo -e "$variable_indice" | sort -n -k 2 | nl )
-   indice_gini=$(awk '{A += $1*$3} ; {B += $3} ; END  {if (B != 0) {printf "%.4f\n", 1-((2*A)/(NR*B)-(NR+1)/(NR))} else printf "%s\n", "non calculable"}' <<< $variable_gini)
-
+   indice_gini=$(awk '{A += $1*$3} ; {B += $3} ; END  {if (B!=0 && NR!=1) {printf "%.4f\n", 1-((2*A)/(NR*B)-(NR+1)/(NR))} else printf "%s\n", "non calculable"}' <<< $variable_gini)
    variable_gini_h=$(awk '$2 != "1" {print}'  <<< $variable_indice)
    variable_gini_h=$(echo -e "$variable_gini_h" | sort -n -k 2 | nl )
-   indice_gini_h=$(awk '{A += $1*$3} ; {B += $3} ; END  {if (B != 0) {printf "%.4f\n", 1-((2*A)/(NR*B)-(NR+1)/(NR))} else printf "%s\n", "non calculable"}' <<< $variable_gini_h)
+   indice_gini_h=$(awk '{A += $1*$3} ; {B += $3} ; END  {if (B!=0 && NR!=1) {printf "%.4f\n", 1-((2*A)/(NR*B)-(NR+1)/(NR))} else printf "%s\n", "non calculable"}' <<< $variable_gini_h)
 }
 # fin calcul indices-----------------fonction : analyse de la frequence des mots------------
 analyse_par_mots_frequence()
