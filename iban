@@ -1,9 +1,10 @@
 #!/bin/bash
 
+# pour debug
 # file="tmp$(date +%m%d-%H%M%S)"
 # cp "$0" "$file"
 # date
-version="1.10 b-20230430"
+version="2.00 b-20230505"
 origin=iban
 usage()
 {
@@ -23,9 +24,12 @@ PRESENTATION GENERALE
 
    Objet  le script $(basename $0) version $version calcule le RIB et l'IBAN d'un
           compte bancaire français à partir des numéros de la banque, du guichet
-          et du compte. Le résultat peut être envoyé dans un fichier.
+          et du compte. Il permet de vérifier la validité d'un IBAN, quel que soit
+          le pays d'émission. Le résultat peut être envoyé dans un fichier.
 
 OPTION
+
+   -v     vérifie la validité d'un IBAN.
 
    -p     le résultat est envoyé dans un fichier intitulé "iban.txt" avec vidage
           de ce fichier s'il existe déjà.
@@ -33,6 +37,10 @@ OPTION
    -q     le résultat est ajouté à un fichier intitulé "iban.txt".
 
 DIVERS
+
+   observation
+          la validité d'un IBAN ne garantit pas l'existence d'un compte bancaire
+          lui correspondant.
 
    exécutabilité
           ce script a été réalisé sous GNU bash, version 5.2.9(1)-release-(x86_64-
@@ -54,6 +62,35 @@ EOF
 echo
 exit
 fi
+#-------------------------------------déclarations-------------------------------------------
+declare -A tab_rib=( [0]=0 [1]=1 [2]=2 [3]=3 [4]=4 [5]=5 [6]=6 [7]=7 [8]=8 [9]=9 \
+                     [A]=1 [B]=2 [C]=3 [D]=4 [E]=5 [F]=6 [G]=7 [H]=8 [I]=9 \
+                     [J]=1 [K]=2 [L]=3 [M]=4 [N]=5 [O]=6 [P]=7 [Q]=8 [R]=9 \
+                     [S]=2 [T]=3 [U]=4 [V]=5 [W]=6 [X]=7 [Y]=8 [Z]=9 )
+declare -A tab_iban=( [0]=0 [1]=1 [2]=2 [3]=3 [4]=4 [5]=5 [6]=6 [7]=7 [8]=8 [9]=9 \
+                     [A]=10 [B]=11 [C]=12 [D]=13 [E]=14 [F]=15 [G]=16 [H]=17 [I]=18 \
+                     [J]=19 [K]=20 [L]=21 [M]=22 [N]=23 [O]=24 [P]=25 [Q]=26 [R]=27 \
+                     [S]=28 [T]=29 [U]=30 [V]=31 [W]=32 [X]=33 [Y]=34 [Z]=35 )
+# fin déclarations -----------------fonction preliminaire------------------------------------
+function preliminaire()
+{
+if ! [ -z $(echo $(sed -E -e 's/|-|v|p|q//g' <<< $@ )) ] ; then
+  usage
+  echo -E -e "::: Contenu non reconnu dans la ligne de commande '$(basename $0) $@'. Abandon.\n"
+  exit
+fi
+if [[ $@ == *-p* || $@ == *-q* ]] ; then
+   fichier_sortie="iban.txt"
+else
+   fichier_sortie="/dev/null"
+fi
+if [[ $@ == *-p* ]] ; then
+   $(> iban.txt)
+fi
+}
+# fin peliminaire -----------------fonction calcul-------------------------------------------
+function calcul()
+{
 echo -e "\n::: Calcul des RIB et IBAN des comptes bancaires français"
 echo -e "::: Code banque et code guichet : 5 chiffres chacun"
 echo -e "::: Numéro de compte : 11 caractères alphanumériques"
@@ -82,13 +119,9 @@ if ! ([[ $num_cpt =~ ^[0-9A-Z]+$ ]] && [[ ${#num_cpt} -eq 11 ]]) ; then
 fi
 
 # calcul de la clé RIB
-declare -A tab=( [0]=0 [1]=1 [2]=2 [3]=3 [4]=4 [5]=5 [6]=6 [7]=7 [8]=8 [9]=9 \
-                 [A]=1 [B]=2 [C]=3 [D]=4 [E]=5 [F]=6 [G]=7 [H]=8 [I]=9 \
-                 [J]=1 [K]=2 [L]=3 [M]=4 [N]=5 [O]=6 [P]=7 [Q]=8 [R]=9 \
-                       [S]=2 [T]=3 [U]=4 [V]=5 [W]=6 [X]=7 [Y]=8 [Z]=9 )
 new_cpt=$(echo $num_cpt | sed 's/./& /g')
 for i in $new_cpt ; do
-    new_cpt1=$new_cpt1${tab[$i]}
+    new_cpt1=$new_cpt1${tab_rib[$i]}
     done
 new_bqe=$(echo $cod_bqe | bc)
 new_gui=$(echo $cod_gui | bc)
@@ -99,23 +132,11 @@ cle_rib=$(printf "%.2u\n" $((97 - $(expr $valeur % 97))))
 bban=$cod_bqe$cod_gui$num_cpt$cle_rib
 valeur=$bban$cod_pays"00"
 valeur=$(echo $valeur | sed 's/./& /g')
-declare -A tab=( [0]=0 [1]=1 [2]=2 [3]=3 [4]=4 [5]=5 [6]=6 [7]=7 [8]=8 [9]=9 \
-                 [A]=10 [B]=11 [C]=12 [D]=13 [E]=14 [F]=15 [G]=16 [H]=17 [I]=18 \
-                 [J]=19 [K]=20 [L]=21 [M]=22 [N]=23 [O]=24 [P]=25 [Q]=2 [R]=27 \
-                 [S]=28 [T]=29 [U]=30 [V]=31 [W]=32 [X]=33 [Y]=34 [Z]=35 )
 for i in $valeur ; do
-    new_val=$new_val${tab[$i]}
+    new_val=$new_val${tab_iban[$i]}
     done
 cle_iban=$(printf "%.2u\n" $((98 - $(expr $new_val % 97))))
 iban=$cod_pays$cle_iban" "$(echo $bban | sed 's/.\{4\}/& /g')
-if [[ $@ == *-p* || $@ == *-q* ]] ; then
-   fichier_sortie="iban.txt"
-else
-   fichier_sortie="/dev/null"
-fi
-if [[ $@ == *-p* ]] ; then
-   $(> iban.txt)
-fi
 echo -e "\n------------------------------------------------------------------------------------- " >> $fichier_sortie
 echo -e "::: Date : $(date)"  >> $fichier_sortie
 echo -e "::: Commande : $(basename $0) $@" | tee -a $fichier_sortie
@@ -127,6 +148,59 @@ echo -e "::: Code banque : $cod_bqe Code guichet : $cod_gui Numéro compte : $nu
 echo -e "::: IBAN :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: " | tee -a $fichier_sortie
 echo -e "::: "$iban | tee -a $fichier_sortie
 echo -e ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" | tee -a $fichier_sortie
+}
+#fin calcul----------------------------fonction verif-------------------------------------------
+function verif()
+{
+echo -e "\n::: Vérification de la validité d'un IBAN français ou étranger"
+read -p "::: IBAN saisi     : " iban_ori
+if [[ -z $iban_ori ]] ; then
+   echo -e "::: Pas d'IBAN saisi. Abandon\n"
+   exit
+fi
+
+iban=$(echo $iban_ori | tr '[:lower:]' '[:upper:]')
+iban=$(sed -E -e 's/[^0-9A-Z]//g' <<< "$iban")
+
+# echo  -e "::: IBAN canonique    : "$(sed 's/.\{4\}/& /g' <<< $iban)
+iban_canon=$(sed 's/.\{4\}/& /g' <<< $iban)
+
+iban=${iban:4:${#iban}}${iban:0:4}
+iban=$(echo $iban | sed 's/./& /g')
+for i in $iban ; do
+    new_iban=$new_iban${tab_iban[$i]}
+    done
+iban=$(sed -E -e 's/^0*//g' <<< "$new_iban")
+#modulo calculé par tronçon
+if [[ ${#iban} -lt 19 ]] ; then
+   modulo=$(($iban % 97 | bc))
+elif [[ ${#iban} -lt 37 ]] ; then
+   modulo=$(($((${iban:0:17} % 97 | bc ))${iban:17:${#iban}} % 97 | bc ))
+else
+   modulo=$(($(($(( ${iban:0:17} % 97 | bc ))${iban:17:17} % 97 | bc ))${iban:34:${#iban}} % 97 | bc ))
+fi
+echo
+echo -e "\n------------------------------------------------------------------------------------- " >> $fichier_sortie
+echo -e "::: Date : $(date)"  >> $fichier_sortie
+echo -e "::: Commande       : $(basename $0) $@" | tee -a $fichier_sortie
+echo -e "::: IBAN saisi     : "$iban_ori >> $fichier_sortie
+echo -e "::: IBAN canonique : "$iban_canon | tee -a $fichier_sortie
+if [[ $modulo -eq 1 ]] ;then
+   echo -e "::: Cet IBAN est valide\n" | tee -a $fichier_sortie
+else
+   echo -e "::: Cet IBAN N'EST PAS valide\n" | tee -a $fichier_sortie
+fi
+}
+#fin verif------------------------------main-----------------------------------------------------
+
+preliminaire $@
+
+if [[ $@ == *-v* ]] ; then
+   verif $@
+else
+   calcul $@
+fi
+
 if [[ $@ == *-p* || $@ == *-q* ]] ; then
     echo -e "::: Les résultats ci-dessus figurent dans le fichier : $(pwd)/iban.txt\n"
 fi
